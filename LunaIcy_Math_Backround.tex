@@ -1,0 +1,73 @@
+\documentclass[A4,12pt,twoside]{book}
+\usepackage{amd}
+
+% %--------------------------------------------------------------------------
+% %         General Setting
+% %--------------------------------------------------------------------------
+
+\graphicspath{{Images/}{../Images/}} %Path of figures
+\setkeys{Gin}{width=0.85\textwidth} %Size of figures
+\setlength{\cftbeforechapskip}{3pt} %space between items in toc
+\setlength{\parindent}{0.5cm} % Idk
+\input{theorems.tex} % Theorems styles and colors
+\usepackage[english]{babel} %Language
+
+\setlist[itemize]{itemsep=5pt} % Adjust the length as needed
+\setlist[enumerate]{itemsep=5pt} % Adjust the length as needed
+
+
+\usepackage[ruled,vlined]{algorithm2e}
+% \usepackage{lmodern} %  Latin Modern font
+% \usepackage{newtxtext,newtxmath}
+
+
+
+
+% %--------------------------------------------------------------------------
+% %         General Informations
+% %--------------------------------------------------------------------------
+\newcommand{\BigTitle}{
+    A MATHEMATICAL TEMPLATE
+    }
+
+\newcommand{\LittleTitle}{
+    For Mathematical Peoples
+    }
+
+    
+\begin{document}
+
+
+
+
+
+
+
+
+\section{Backround}
+Consider the PDE and the ODE
+\[
+\frac{\partial}{\partial t} T(x,t) = S(x,t) \frac{\partial^2}{\partial x^2} T(x,t), \quad \frac{\partial}{\partial t} S(x,t) = T(x,t) - S(x,t), \quad \forall x,t
+\]
+Then with symmetric differences
+\[
+\frac{\partial}{\partial t} T(x,t) = S(x,t) \frac{T(x-h,t)-2 T(x,t)+T(x+h,t)}{h^2} + \mathcal{O}(h^4).
+\]
+We now discretize the state space $\Omega$ by $[x_0,...,x_{n+1}]$ and define $s_i (t) := S(x_i ,t)$ and $T_i (t) := S_(x_i,t)$ and then get
+\[
+\frac{d}{dt} \begin{pmatrix}
+    T_1 \\
+    S_1 \\
+    \hdots \\
+    T_n \\
+    S_n
+\end{pmatrix} = \begin{pmatrix}
+    S_1 (t) \frac{T_0(t) - 2 T_1 (t) + T_2 (t) }{h^2} + \mathcal{O}(h^4) \\
+    T_1 (t) - S_1 (t) \\
+    \hdots \\
+    S_n (t) \frac{T_{n-1} (t) - 2 T_n (t) + T_{n+1} (t) }{h^2}+ \mathcal{O}(h^4) \\
+    T_n (t) - S_n (t) \\
+\end{pmatrix}
+\]
+which is a system of $2n$ ODEs.
+\end{document}

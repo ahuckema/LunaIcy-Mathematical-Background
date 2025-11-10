@@ -1,0 +1,255 @@
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems}
+\usepackage{amsmath, amsthm}
+
+% Define custom colors
+\definecolor{defscol}{HTML}{2929AB} % For definitions
+\definecolor{asumscol}{HTML}{ff9d88} % For Assumptions
+\definecolor{rmkscol}{HTML}{81F7D8} % For remarks
+\definecolor{exmscol}{HTML}{888fff} % For examples
+\definecolor{algscol}{HTML}{888fff} % For Algorithms
+\definecolor{lemscol}{HTML}{88ffbe} % For Lemmas
+\definecolor{thmscol}{HTML}{27B0F5} % For Theorems
+\definecolor{prpscol}{HTML}{88ffbe} % For Propositions
+\definecolor{corscol}{HTML}{88ffbe} % For Corollaries
+\definecolor{clmscol}{HTML}{165c58} % For Claims
+\definecolor{facscol}{HTML}{28a8a1} % For Facts
+
+% ============================
+% Definition
+% ============================
+\newtcbtheorem[number within=section]{mydefinition}{Definition}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=defscol!100!white,
+    colback=defscol!15!white,
+    boxrule=0pt, sharp corners, % Prevent overlap by removing sharp borders
+    before skip=10pt, after skip=10pt % Add spacing around the box
+}{defn}
+
+\NewDocumentCommand{\defn}{m+m}{
+    \begin{mydefinition}{#1}{}
+        #2
+    \end{mydefinition}
+}
+
+\NewDocumentCommand{\defnr}{mm+m}{
+    \begin{mydefinition}{#1}{#2}
+        #3
+    \end{mydefinition}
+}
+
+% ============================
+% Theorem
+% ============================
+\newtcbtheorem[use counter from=mydefinition]{mytheorem}{Theorem}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=thmscol!100!white,
+    colback=thmscol!15!white,
+    boxrule=0pt, sharp corners,
+    before skip=10pt, after skip=10pt
+}{thm}
+
+\NewDocumentCommand{\thm}{m+m}{
+    \begin{mytheorem}{#1}{}
+        #2
+    \end{mytheorem}
+}
+
+\NewDocumentCommand{\thmr}{mm+m}{
+    \begin{mytheorem}{#1}{#2}
+        #3
+    \end{mytheorem}
+}
+
+% ============================
+% Lemma
+% ============================
+\newtcbtheorem[use counter from=mydefinition]{mylemma}{Lemma}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=lemscol!40!white,
+    colback=lemscol!20!white,
+    boxrule=0pt, sharp corners,
+    before skip=10pt, after skip=10pt
+}{lem}
+
+\NewDocumentCommand{\lem}{m+m}{
+    \begin{mylemma}{#1}{}
+        #2
+    \end{mylemma}
+}
+
+% ============================
+% Corollary
+% ============================
+\newtcbtheorem[use counter from=mydefinition]{mycorollary}{Corollary}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=corscol!40!white,
+    colback=corscol!20!white,
+    boxrule=0pt, sharp corners,
+    before skip=10pt, after skip=10pt
+}{cor}
+
+\NewDocumentCommand{\cor}{+m}{
+    \begin{mycorollary}{}{}
+        #1
+    \end{mycorollary}
+}
+
+% ============================
+% Proposition
+% ============================
+\newtcbtheorem[use counter from=mydefinition]{myproposition}{Proposition}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=prpscol!30!white,
+    colback=prpscol!20!white,
+    boxrule=0pt, sharp corners,
+    before skip=10pt, after skip=10pt
+}{prop}
+
+\NewDocumentCommand{\prop}{+m}{
+    \begin{myproposition}{}{}
+        #1
+    \end{myproposition}
+}
+
+% ============================
+% Claim
+% ============================
+\newtcbtheorem[use counter from=mydefinition]{myclaim}{Claim}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=clmscol!40!white,
+    colback=clmscol!20!white,
+    boxrule=0pt, sharp corners,
+    before skip=10pt, after skip=10pt
+}{clm}
+
+\NewDocumentCommand{\clm}{m+m}{
+    \begin{myclaim}{#1}{}
+        #2
+    \end{myclaim}
+}
+
+% ============================
+% Fact
+% ============================
+\newtcbtheorem[use counter from=mydefinition]{myfact}{Fact}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=facscol!40!white,
+    colback=facscol!20!white,
+    boxrule=0pt, sharp corners,
+    before skip=10pt, after skip=10pt
+}{fact}
+
+\NewDocumentCommand{\fact}{+m}{
+    \begin{myfact}{}{}
+        #1
+    \end{myfact}
+}
+
+% ============================
+% Proof
+% ============================
+\NewDocumentCommand{\pf}{+m}{
+    \begin{proof}
+        [\noindent\textbf{Proof.}]
+        #1
+    \end{proof}
+}
+
+% ============================
+% Example
+% ============================
+\newtcbtheorem[number within=section]{myexample}{Example}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=exmscol!100!white,
+    colback=exmscol!15!white,
+    boxrule=0pt, sharp corners,
+    before skip=10pt, after skip=10pt
+}{exm}
+
+\NewDocumentCommand{\exm}{m+m}{
+    \begin{myexample}{#1}{}
+        #2
+    \end{myexample}
+}
+
+% ============================
+% Remark
+% ============================
+\newtcbtheorem[number within=section]{myremark}{Remark}
+{
+    enhanced,
+    frame hidden,
+    titlerule=0mm,
+    toptitle=1mm,
+    bottomtitle=1mm,
+    fonttitle=\bfseries\large,
+    coltitle=black,
+    colbacktitle=rmkscol!100!white,
+    colback=rmkscol!15!white,
+    boxrule=0pt, sharp corners,
+    before skip=10pt, after skip=10pt
+}{rmk}
+
+\NewDocumentCommand{\rmkb}{+m}{
+    \begin{myremark}{}{}
+        #1
+    \end{myremark}
+}
