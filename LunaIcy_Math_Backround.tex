@@ -44,30 +44,288 @@
 
 
 
-\section{Backround}
-Consider the PDE and the ODE
+\chapter*{LunaIcy numerics of ODEs and PDEs}
+\section{Mathematical Derivation of the Main Problem}
+Consider a one dimensional slice of the Ice sheet of Jupiters moon Europa. This is our state space $\Omega := [0,d] \subset \mathbb{R}$ where $d$ denotes the depth od the ice sheet. The average microstructure $y(x,t) := (r_g (x,t) , r_b (x,t))^T$, where $r_g$ is the average grain radius and $r_b$ is the average bond radius is modelled by the system of ODEs for every $x \in \Omega$ as 
+\begin{equation}
+\label{ODE}
+\frac{d}{dt} y(x,t) = f(y(x,t), T(x,t)), t>0,\quad y(x,0) = y_0 (x).
+\end{equation}
+The average temperature at $x \in \Omega$ is modelled via the heat eqaution with Neuman boundary data
+\begin{align}
+    \label{PDE}
+&\rho (x,t) c_p (x,t) \frac{\partial}{\partial t} T(x,t) = \frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t), \quad x \in \Omega, t>0 \\
+\label{Neumann}
+&k(0,t) \frac{\partial}{\partial x}  T(0,t) = - F_{solar} (t) + \epsilon \sigma_{SB} T(0,t)^4 \text{ and } k(d,t) \frac{\partial}{\partial x}  T(d,t) =0 , \quad t >0 \\
+&T(x,0) = T_0 (x), x \in \Omega,
+\end{align}
+where $\rho,c_p$ and $k$ are model specific functions that depend on $y(x,t)$, coupling the ODE to the PDE. $F_{solar}$ is the energy that comes from the sun and $\sigma_{SB}$ and $\epsilon$ are model specific constants.\\
+To numerically solve this problem we first discretize the state space by $\Omega_h \subset \Omega$ and thus get a system of ODEs as (\ref{ODE}) and approximating (\ref{PDE}) by the methods of lines. We integrate both sides from $[x_{i-\frac{1}{2}}, x_{i+ \frac{1}{2}}]$ and divide by the length of the intervall $h$: 
+\begin{align*}
+&\rho (x,t) c_p (x,t) \frac{\partial}{\partial t} T(x,t) = \frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) \\
+&\iff \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho (x,t) c_p (x,t) \frac{\partial}{\partial t} T(x,t) dx = \frac{1}{h} \int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) dx \\
+&\iff \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho (x,t) c_p (x,t) \frac{\partial}{\partial t} T(x,t) dx = \frac{1}{h} \left( k(x_{i+\frac{1}{2}},t) \frac{\partial}{\partial x} T(x_{i+\frac{1}{2}},t) -  k(x_{i-\frac{1}{2}},t) \frac{\partial}{\partial x} T(x_{i-\frac{1}{2}},t) \right) \\
+&\iff \frac{\partial}{\partial t} \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho (x,t) c_p (x,t)  T(x,t) dx \\
+&\qquad = \frac{1}{h} \left( k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h} + \mathcal{O}(h^2) \right).
+\end{align*}
+Thus for every $x_i$ we get the approximate ODE (second order error)
 \[
-\frac{\partial}{\partial t} T(x,t) = S(x,t) \frac{\partial^2}{\partial x^2} T(x,t), \quad \frac{\partial}{\partial t} S(x,t) = T(x,t) - S(x,t), \quad \forall x,t
+\frac{\partial}{\partial t} \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho (x,t) c_p (x,t)  T(x,t) dx \approx k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h^2} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h^2} .
 \]
-Then with symmetric differences
+We will approximate the left hand side integral by its center point (mean value theorem) and thus get the three point method 
 \[
-\frac{\partial}{\partial t} T(x,t) = S(x,t) \frac{T(x-h,t)-2 T(x,t)+T(x+h,t)}{h^2} + \mathcal{O}(h^4).
+\frac{\partial}{\partial t} \frac{1}{h}  \rho (x_i,t) c_p (x_i,t)  T(x_i,t)  h \approx k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h^2} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h^2} .
 \]
-We now discretize the state space $\Omega$ by $[x_0,...,x_{n+1}]$ and define $s_i (t) := S(x_i ,t)$ and $T_i (t) := S_(x_i,t)$ and then get
+This approximation only holds for the interior. Because we have Neumann boundary data (\ref{Neumann}) on both sides we need to introduce ghost cells. Aproximating the boundary data by symmetric differences, i.e. also second order, we get 
+\begin{align*}
+    &k(x_0,t) \frac{T( x_{1} ,t) -T(x_{-1},t)}{2h} + \mathcal{O}(h^2) = -F_{solar} (t) + \epsilon \sigma_{SB}
+ T(x_0 , t)^4 \\
+ & k(x_d,t) \frac{T(x_{d+1},t) - T(x_{d-1},t)}{2h} + \mathcal{O}(h^2) =0.
+\end{align*}
+Thus approximately it holds 
+\begin{align*}
+    &T(x_{-1},t) \approx   \frac{2h}{k(x_0,t)} \left(   F_{solar} (t)-\epsilon \sigma_{SB} T(x_0,t)^4  \right) +T(x_1,t) =: T_{-1} (t)  \\
+    &T(x_{d+1},t) =  T(x_{d-1} ,t)
+\end{align*}
+
+
+
+Thus in total the following system of ODEs needs to be solved 
+\begin{align*}
+    \frac{d}{dt} \begin{pmatrix}
+        y(x_0,t) \\
+         \rho (x_0,t) c_p (x_0,t)  T(x_0,t) \\
+        y(x_1,t) \\
+         \rho (x_1,t) c_p (x_1,t)  T(x_1,t) \\
+        \vdots \\
+        y(x_{d-1},t) \\
+          \rho (x_{d-1},t) c_p (x_{d-1},t)  T(x_{d-1},t) \\
+        y(x_{d},t) \\
+         \rho (x_d,t) c_p (x_d,t)  T(x_d,t) \\
+    \end{pmatrix}
+    = \begin{pmatrix}
+        f(y(x_0,t),T(x_0,t))\\
+        k(x_{\frac{1}{2}},t) \frac{T(x_{1},t)-T(x_0,t)}{h^2} -  k(x_{-\frac{1}{2}},t) \frac{T(x_0,t) - T_{-1} (t) }{h^2} \\
+        f(y(x_1,t),T(x_1,t))\\
+        k(x_{1+\frac{1}{2}},t) \frac{T(x_{2},t)-T(x_1,t)}{h^2} -  k(x_{1-\frac{1}{2}},t) \frac{T(x_1,t) - T(x_{0},t)}{h^2} \\
+        \vdots \\
+        f(y(x_{d-1},t),T(x_{d-1},t))\\
+        k(x_{d-\frac{1}{2}},t) \frac{T(x_{d},t)-T(x_{d-1},t)}{h^2} -  k(x_{d-\frac{3}{2}},t) \frac{T(x_{d-1},t) - T(x_{d-2},t)}{h^2} \\
+        f(y(x_{d},t),T(x_{d},t))\\
+        k(x_{d+\frac{1}{2}},t) \frac{T(x_{d-1},t)-T(x_d,t)}{h^2} -  k(x_{d-\frac{1}{2}},t) \frac{T(x_d,t) - T(x_{d-1},t)}{h^2} \\
+    \end{pmatrix}
+\end{align*}
+When considering the right hand side the product rule yields
+\[
+\frac{d}{dt} \rho (x_i,t) c_p (x_i,t)  T(x_i,t)  =  \rho (x_i,t) c_p (x_i,t) \frac{d}{dt} \left( T(x_i,t) \right)  + T(x_i,t) \frac{d}{dt} \left( \rho (x_i,t)  c_p (x_i,t)  \right).
+\]
+The second summand is neglegable due to the fact that it describes the rate at which the material properties change. One estimates the age of the Ice sheet to be 30 Million years old (R. T. Pappalardo et al. 1998). This begs the question wether Europa’s ice microstructure
+changed in a shorter time than its ice crust age? For simplifications, we answer this questions with no, for now. This simplies the system of ODEs to:
+\[
+ \frac{d}{dt} \begin{pmatrix}
+        y(x_0,t) \\
+          T(x_0,t) \\
+        y(x_1,t) \\
+          T(x_1,t) \\
+        \vdots \\
+        y(x_{d-1},t) \\
+           T(x_{d-1},t) \\
+        y(x_{d},t) \\
+           T(x_d,t) \\
+    \end{pmatrix}
+    = \begin{pmatrix}
+        f(y(x_0,t),T(x_0,t))\\
+        \frac{1}{\rho (x_0,t) c_p (x_0,t)}\left( k(x_{\frac{1}{2}},t)  \frac{T(x_{1},t)-T(x_0,t)}{h^2} -  k(x_{-\frac{1}{2}},t) \frac{T(x_0,t) - T_{-1} (t) }{h^2} \right)\\
+        f(y(x_1,t),T(x_1,t))\\
+        \frac{1}{\rho (x_1,t) c_p (x_1,t) }\left( k(x_{1+\frac{1}{2}},t)  \frac{T(x_{2},t)-T(x_1,t)}{h^2} -  k(x_{1-\frac{1}{2}},t) \frac{T(x_1,t) - T(x_{0},t)}{h^2} \right)\\
+        \vdots \\
+        f(y(x_{d-1},t),T(x_{d-1},t))\\
+        \frac{1}{\rho (x_{d-1},t) c_p (x_{d-1},t) }\left(k(x_{d-\frac{1}{2}},t)  \frac{T(x_{d},t)-T(x_{d-1},t)}{h^2} -  k(x_{d-\frac{3}{2}},t) \frac{T(x_{d-1},t) - T(x_{d-2},t)}{h^2} \right)\\
+        f(y(x_{d},t),T(x_{d},t)) \\
+        \frac{1}{\rho (x_d,t) c_p (x_d,t)} \left(k(x_{d+\frac{1}{2}},t) \frac{T(x_{d-1},t)-T(x_d,t)}{h^2} -  k(x_{d-\frac{1}{2}},t) \frac{T(x_d,t) - T(x_{d-1},t)}{h^2} \right)\\
+    \end{pmatrix}
+\]
+\section{Introduction into the Physics Motivated Equations}
+Here the volumes of the grains and bonds will be determined, as they are essential in the dynamics of the model. Then follows the derivation of the ODE that describes the dynamics of the grain and bonds with the water vapor. 
+\subsection{Grain Volume}
+The set 
+\[
+V^{r_g} := \{ x \in \mathbb{R}^3 \mid |x| < r_g, 0 \leq x_1 < \hat{x}^*, 0 \leq x_2 \}.
+\]
+Further, for $u: \mathbb{R}^3 \to \mathbb{R}, x \mapsto \sqrt{x^2_1 +x^2_2 + x_3^2} = |x| $ the level set $u^{-1}$ describes the set of all points on the sphere $S_r^2$ with radius $r$. Cearly for all $x \in u^{-1} (r)$ the gradient is $\nabla u = \left( \frac{x_1}{r}, \frac{x_2}{r} , \frac{x_3}{r} \right)$ satisfies $|\nabla u|=1$. With the Co-area formula it holds 
+\[
+\int_{V^{r_g}} |\nabla u| d^3 x = \int_0^{r_g} \int_{ V^{r_g} \cap u^{-1}(r)} d \sigma (z) dr.
+\]
+Define the parametrization $\phi_r : U_r \to V^{r_g} \cap u^{-1} (r) , (\theta,\vartheta) \mapsto (r \sin (\vartheta) \cos (\theta),r \sin (\theta) \sin (\vartheta), r \cos (\vartheta))$, where \[
+U_r := \{ (\theta, \vartheta) \in [0, \frac{\pi}{2}] \times [0,\pi] \mid  r \sin (\vartheta) \cos (\theta) < \hat{x}^* \}. 
+\]
+Its partial derivatives are 
+\begin{align*}
+&\frac{\partial}{\partial \theta} \phi_r (\theta, \vartheta) = (-r \sin (\vartheta ) \sin (\theta), r \cos (\theta) \sin (\vartheta),0) \\
+& \frac{\partial}{\partial \vartheta} \phi_r (\theta, \vartheta) = (r \cos (\vartheta) \cos (\theta), r  \sin(\theta) \cos (\vartheta),-r \sin (\vartheta)).
+\end{align*}
+Then it holds that 
+\[
+\det \left(  \begin{pmatrix}
+    (\frac{\partial}{\partial \theta} \phi_r)^T \frac{\partial}{\partial \theta} \phi_r & (\frac{\partial}{\partial \theta} \phi_r)^T \frac{\partial}{\partial \vartheta} \phi_r \\
+    (\frac{\partial}{\partial \vartheta} \phi_r)^T \frac{\partial}{\partial \theta} \phi_r & (\frac{\partial}{\partial \vartheta} \phi_r)^T \frac{\partial}{\partial \vartheta} \phi_r
+\end{pmatrix} \right) = \det \left( \begin{pmatrix}
+    r^2 \sin (\vartheta)^2 &0 \\ 0 & r^2
+\end{pmatrix} \right) = r^4 \sin (\vartheta)^2.
+\]
+Thus the manifold integral is given by 
+\begin{align*}
+&\int_0^{r_g} \int_{ V^{r_g} \cap u^{-1}(r)} d \sigma (z) dr = \int_0^{r_g} \int_{ U_r} 1 \circ \phi_r(\theta) \sqrt{\det((\phi^\prime) ^T \phi^\prime)} d(\theta,\vartheta) dr \\
+&= \int_0^{r_g} \int_{ U_r}  1\cdot r^2 \sin (\vartheta) d (\theta,\vartheta) dr
+\end{align*}
+For $\hat{x}^* > r_g$ this integral is trivial equal to $\int_0^{r_g}\pi r^2 dr = \pi \frac{r_g^{3}}{3}$. More interesting in this application is the opposite case. In order to solve it, we use Fubini (where $U_r^\theta := \{ \vartheta \in [0,\pi] \mid (\theta,\vartheta) \in U_r \}$) 
+\[
+\int_0^{r_g} r^2 \int_0^{\pi/2} \int_{ U_r^\theta }   \sin (\vartheta) d \vartheta d\theta dr
+\]
+We now need to take a closer look at the inner most integral. The condition $\sin (\vartheta) < \frac{\hat{x}^*}{r \cos (\theta)}$ is satified if we choose $\theta = arcos (\frac{\hat{x}^*}{r})$ or larger, because 
+\[
+\sin (\vartheta) \leq 1 = \frac{\hat{x}^*}{r \cos arcos (\frac{\hat{x}^*}{r})} \text{ is always satisfied.}
+\]
+Thus for $\theta \geq arcos (\frac{\hat{x}^*}{r})$ we need no restriction. For $\theta < arcos (\frac{\hat{x}^*}{r})$ our condition is only satisfied, if
+\[
+\vartheta = \underbrace{arcsin (\frac{\hat{x}^*}{r \cos (\theta)})}_{=: B} 
+\]
+or smaller. It is also satified during this choice of $\theta  < arcos (\frac{\hat{x}^*}{r})$, if 
+\[
+ \pi - B < \vartheta \leq \pi, \text{ because } 0<\sin(\pi-arcsin (\frac{\hat{x}^*}{r \cos (\theta)}) )  < \frac{\hat{x}^*}{r \cos (arcos (\frac{\hat{x}^*}{r}))} =1
+\]
+and on that proposed intervall $\sin (\vartheta)$ is monotonically decreasing.??? Thus in total we get for $r < r_g$:
+\begin{align*}
+   &\int_0^{\pi/2} \int_{ U_r^\theta }   \sin (\vartheta) d \vartheta d \theta = \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( \int^{ B}_0 \sin (\vartheta) d \vartheta +\int_{\pi-B}^\pi \sin (\vartheta) d \vartheta   \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2} \int_0^\pi   \sin(\vartheta) d \vartheta d \theta \\
+   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( \cos (0) - \cos (B) + \cos (\pi -B)-\cos (\pi) \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2}    \cos(0)-\cos (\pi)   d \theta \\
+   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( 1 - \cos (B) +\cos (\pi -B)+1 \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2}    2   d \theta \\
+   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( 2 - \cos (B) -\cos (B) \right) d \theta  + 2 \left(  \frac{\pi}{2} - arcos(\frac{\hat{x}^*}{r})\right)\\
+   &= 2arcos (\frac{\hat{x}^*}{r}) -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \cos (B)  d \theta  +  \pi- 2 arcos(\frac{\hat{x}^*}{r})\\
+   &= \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \cos (arcsin (\frac{\hat{x}^*}{r \cos (\theta)}))  d \theta  \\
+   &= \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta 
+\end{align*}
+Thus in total it holds for $\hat{x}^* \leq r_g$ that
+\begin{align*}
+&\int_{V^{r_g}}  d^3 x= \int_0^{r_g} r^2 \text{1}_{0 \leq r < \hat{x}^*} \left( \pi - 2 \cdot 0\right)+ r^2 \left( \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta \right)  \text{1}_{ \hat{x}^*< r \leq r_g}  d r \\
+&= \pi \frac{(\hat{x}^*)^3}{3}+\pi \left( \frac{r_g^3}{3} - \frac{(\hat{x}^*)^3}{3} \right) - 2\int^{r_g}_{\hat{x}^*} r^2 \underbrace{\int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta}_{=: A(\hat{x}^*,r)} dr.
+\end{align*}
+Note that $A(\hat{x}^*,r)$ does not have an analytical solution and needs to be solved numerically.
+\subsection{Bond Volume}
+...
+\subsection{Deriving the ODE}
+In the introduction we defined an ODE over the radii of the average grain and bond of the mircostructure. This paper models the change of mass of the grain and the bond using the interactions with the adjacent water vapor and then connect that to the change of the radii. We consider the ODE 
 \[
 \frac{d}{dt} \begin{pmatrix}
-    T_1 \\
-    S_1 \\
-    \hdots \\
-    T_n \\
-    S_n
+    m_g (t) \\ m_b (t)
 \end{pmatrix} = \begin{pmatrix}
-    S_1 (t) \frac{T_0(t) - 2 T_1 (t) + T_2 (t) }{h^2} + \mathcal{O}(h^4) \\
-    T_1 (t) - S_1 (t) \\
-    \hdots \\
-    S_n (t) \frac{T_{n-1} (t) - 2 T_n (t) + T_{n+1} (t) }{h^2}+ \mathcal{O}(h^4) \\
-    T_n (t) - S_n (t) \\
+     J_{v,g} (t) S_{v,g} (t) +  J_{b,g} (t) S_{b,g} (t) \\
+     J_{v,b} (t) S_{v,b}(t) + J_{g,b} (t) S_{g,b}(t)
 \end{pmatrix}
 \]
-which is a system of $2n$ ODEs.
+which stems from the Hertz-Knudsen formula. Here $S_{v,g} (t)$ denotes the area of the grain with the outward gas and $J_{v,g}$ is the repective flux, $ S_{v,b}(t)$ the area of the bond with the gas, $S_{g,b}$ and $S_{b,g}$ the area of the grain with the bond.\\
+Due to mass conservation, i.e. $J_{b,g} (t) S_{b,g} (t)=- J_{g,b} (t) S_{g,b}(t)$, it follows the total mass is 
+\[
+\frac{d}{dt} m_g (t) + \frac{d}{dt} m_b (t) = J_{v,g} (t) S_{v,g} (t)+  J_{b,g} (t) S_{b,g} (t) + J_{v,b} (t) S_{v,b}(t)+ J_{g,b} (t) S_{g,b}(t), =J_{v,g} (t) S_{v,g} (t)+ J_{v,b} (t) S_{v,b}(t).
+\]
+To solve this we use implicit Euler with step size $\tau >0$
+\[
+m_g (t+\tau) = m_g (t)+ \tau \left( J_{v,g} (t+\tau) S_{v,g} (t+\tau) +  J_{b,g} (t+\tau) S_{b,g} (t+\tau) \right).
+\]
+and for $m_b$ analogously. After every step the calculation of the volume of the grain and bond is done using 
+\[
+V_g (t+ \tau ) = \frac{m_g(t+ \tau)}{\rho_0}, \quad V_b (t+ \tau) = \frac{m_b(t+ \tau)}{\rho_0} ,
+\]
+where $\rho_0$ is ???. Using this the Radii are calculated as 
+\[
+\begin{pmatrix}
+    r_g (t+\tau) \\ 
+    r_b (t+\tau)
+\end{pmatrix} = \arg \min_{r_g,r_b} \begin{pmatrix}
+    |V_g (t+ \tau) - v_g (r_g,r_b)| \\ 
+    |V_b (t+ \tau) - v_b (r_g,r_b)|
+\end{pmatrix} 
+\]
+Finally, we do one time step of the PDE and update the temperature.
+
+\subsection{Connecting the PDE to the ODE}
+We model the the change of gas mass ($m_b,m_g$) via the Kelvin equation (ODE) and then update the volume ($V_b,V_g$) of a microstructure by 
+
+The radii are a little harder to update. They are 
+
+where $v_b$ and $v_g$ are complicated functions, that will be mentioned later.
+
+
+
+
+
+The change of Volume of the grains is dependend on the radius of the grains at a given time, i.e. 
+\[
+\frac{d}{dt} V_g (r_g (t),r_b (t)) = \frac{\partial}{\partial r_g} V_g (r_g (t),r_b (t)) \frac{d}{dt} r_g (t) + \frac{\partial}{\partial r_b}V_g (r_g (t),r_b (t))  \frac{d}{dt} r_b (t) = - \frac{J_{gp}(y,T(x,t))}{\rho_{ice}},
+\]
+although we used in the last equation the result from the paper. The volumes from the bounds is in similiar fasion 
+\[
+\frac{d}{dt} V_b (r_g (t),r_b (t)) = \frac{\partial}{\partial r_g} V_b (r_g (t),r_b (t)) \frac{d}{dt} r_g (t) + \frac{\partial}{\partial r_b}  V_b (r_g (t),r_b (t)) \frac{d}{dt} r_b (t) =  \frac{J_{pb}(y,T(x,t))}{\rho_{ice}},
+\]
+lthough we used in the last equation the result from the paper. As both these equations need to be satisfied, the following set of euqations follow 
+\[
+\frac{d}{dt} \begin{pmatrix}
+    V_g \\ V_b
+\end{pmatrix} = \underbrace{\begin{pmatrix}
+    \frac{\partial}{\partial r_g} V_g &  \frac{\partial}{\partial r_b} V_g \\
+     \frac{\partial}{\partial r_g} V_b &  \frac{\partial}{\partial r_b} V_b
+\end{pmatrix}}_{=: J} \frac{d}{dt} \begin{pmatrix}
+    r_g \\ r_b
+\end{pmatrix} = \frac{1}{\rho_{ice}} \begin{pmatrix}
+    -J_{gp} \\ J_{pb}
+\end{pmatrix}.
+\]
+Thus the ODE in (\ref{ODE}) to be solved is 
+\[
+\frac{d}{dt} \begin{pmatrix}
+    r_g \\ r_b
+\end{pmatrix} = J^{-1} \frac{1}{\rho_{ice}} \begin{pmatrix}
+    -J_{gp} \\ J_{pb}
+\end{pmatrix}.
+\]
+Here specifically 
+\[
+V_g (r_g ,r_b) := \frac{4}{3} \pi r^3_g, \quad V_b (r_g,r_b) := \frac{\pi r_b^4}{2 r_g}
+\]
+and 
+\begin{align*}
+&J_{gp} (y(x,t),T(x,t)) \approx C_{gp} \frac{p_{sat}(T(x,t)) }{T(x,t)^{3/2}} r_g(t), \quad J_{pb} (y(x,t),T(x,t)) \approx C_{pb} \frac{p_{sat} (T(x,t)) }{T(x,t)^{3/2}} \frac{r_g^2(t)}{r_b(t)}, \\
+&p_{sat} (T(x,t)) \approx p_0 e^{- \frac{\Delta H_{sub}}{R T(x,t)}},
+\end{align*}
+where $C_{gp}, C_{pb}, \Delta H_{sub}, p_0 \in \mathbb{R}$ are model specific constants. Then 
+\[
+J (r_g,r_b) = \begin{pmatrix}
+    4 \pi r^2_g & 0 \\
+    - \frac{\pi r_b^4}{2 r_g^2} & \frac{2 \pi r_b^3}{r_g}
+\end{pmatrix}.
+\]
+Thus the ODE to be solved is 
+\[
+\frac{d}{dt} \begin{pmatrix}
+    r_g \\ r_b
+\end{pmatrix} = \begin{pmatrix}
+    4 \pi r^2_g & 0 \\
+    - \frac{\pi r_b^4}{2 r_g^2} & \frac{2 \pi r_b^3}{r_g}
+\end{pmatrix}^{-1}  \frac{1}{\rho_{ice}} p_0 e^{- \frac{\Delta H_{sub}}{R T(x,t)}} \begin{pmatrix}
+    -C_{gp} \frac{1}{T(x,t)^{3/2}} r_g(t) \\ C_{pb} \frac{1}{T(x,t)^{3/2}} \frac{r_g^2(t)}{r_b(t)}
+\end{pmatrix},
+\]
+where $C_{gp}, C_{pb}, \Delta H_{sub}, p_0, \rho_{ice},R \in \mathbb{R}$ have to be chosen in a reasonable way.
+\subsection{Connecting the ODE to the PDE}
+The PDE numerical method for the PDE is almoust solved. What is left is to determine the functions $c_p, \rho, k$. Define
+\begin{align*}
+&c_p (y(t)) \equiv c_{p,ice} \in \mathbb{R}, \quad \rho (y(t)) := \rho_{ice} (1- \phi (y(t)) ), \quad k(y(t)) \approx k_{ice} (1- \phi ((t)))
+ \left( \frac{r_b}{r_g} \right)^\alpha  \\
+& \phi (y(t)) := \phi_{initial} \left( 1- \frac{r_b(t)}{r_g(t)} \right), \quad \phi_{initial},k_{ice},\rho_{ice} \in \mathbb{R}, \alpha >0, \quad y(t) = (r_g(t),r_b(t))^T.
+ \end{align*}
+
+\subsection{Stiffness of the Problem}
+
+
+\section{Simulations}
+
 \end{document}
