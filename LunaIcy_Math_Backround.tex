@@ -212,6 +212,32 @@ Thus in total it holds for $\hat{x}^* \leq r_g$ that
 Note that $A(\hat{x}^*,r)$ does not have an analytical solution and needs to be solved numerically.
 \subsection{Bond Volume}
 ...
+\subsection{Surface Area and Curvature}
+The Surface area is in this model of crucial importance, as it models the exchange of water vapor mass. For the grain and the bond we can easily calculate it from our derivation above. The grains surface area is given by 
+\[
+S_g := r_g^2 \cdot \left( \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r_g})} \sqrt{1- \left( \frac{\hat{x}^*}{r_g \cos (\theta)} \right)^2}  d \theta  \right)
+\]
+and the surface area of the grain is ...\\
+The curvature of the grain is $K_g = \frac{2}{r_g}$
+
+\subsection{Physics behind the ODE}
+We denote by $P_{gas} (t) $ the pressure of the surrounding gas/water vapor at time $t$. $P_{K_j} (t)$ denotes the the equilibrium vapor pressure of a curved surface $j$ with average curvature $K_j$. Note that a result in ??? is that 
+\[
+\text{convex surface pressure $>$ flat surface pressure $>$ concave surface pressure.}
+\]
+The Flux of a grain or a bond is then given by 
+\[
+J_i (t) := \alpha (P_{K_i} (t) - P_{gas} (t)) \sqrt{\frac{M}{2 \pi R T(x,t)}}, \quad i = g,b,
+\]
+where $\alpha, R, M \in \mathbb{R}$ are constants and $T(x,t)$ denotes the temperature of the grain at point $x \in [0,d]$ at time $t\geq 0$. The curved surface pressure of $K_j$ is given by 
+\[
+P_{K_j } (t) := P_{sat} (T(x,t)) \left( 1+ \frac{\gamma M}{R T(x,t) \rho_0} K_j (t) \right), \quad j=g,b,
+\] 
+where $\gamma,\rho_0, R, M \in \mathbb{R}$ are constants and $P_{s}(T(x,t))= P_0 e^{-\frac{Q_{sub}}{RT(x,t)}}$ is the saturated water pressure of a flat surface (???). Here $P_0,Q_{sub},R \in \mathbb{R}$ are constants. Furhter, 
+\[
+P_{gas} (T(x,t)) := \frac{m_g (t) R T(x,t)}{M V_{pore}} =\frac{(1-\phi) m_g (t) \rho_0 R T(x,t)}{M V_g \phi}, \quad  V_{pore} := V_g \frac{\phi}{1-\phi} ,
+\]
+where $V_g$ denotes the volume of the grain, ...???.
 \subsection{Deriving the ODE}
 In the introduction we defined an ODE over the radii of the average grain and bond of the mircostructure. This paper models the change of mass of the grain and the bond using the interactions with the adjacent water vapor and then connect that to the change of the radii. We consider the ODE 
 \[
@@ -227,7 +253,30 @@ Due to mass conservation, i.e. $J_{b,g} (t) S_{b,g} (t)=- J_{g,b} (t) S_{g,b}(t)
 \[
 \frac{d}{dt} m_g (t) + \frac{d}{dt} m_b (t) = J_{v,g} (t) S_{v,g} (t)+  J_{b,g} (t) S_{b,g} (t) + J_{v,b} (t) S_{v,b}(t)+ J_{g,b} (t) S_{g,b}(t), =J_{v,g} (t) S_{v,g} (t)+ J_{v,b} (t) S_{v,b}(t).
 \]
-To solve this we use implicit Euler with step size $\tau >0$
+
+
+Plugging this into the ODE yields 
+\begin{align*}
+    &\frac{d}{dt} m_g (t) = J_{v,g} (t) S_{v,g} (t)+ J_{v,b} (t) S_{v,b}(t) \\
+    &= S_g \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left( P_s (T(x,t)) \left(1 + \frac{\gamma M}{R T(x,t) \rho_0} K_g  \right) -P_{gas}(T(x,t)) \right) \\
+    &+ S_b \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left( P_s (T(x,t)) \left(1 + \frac{\gamma M}{R T(x,t) \rho_0} K_b \right)-P_{gas}(T(x,t))  \right) \\
+    &= \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left( (s_g + S_b) P_s (T(x,t)) + S_g P_s (T(x,t)) \frac{\gamma M}{R T(x,t) \rho_0} K_g + S_b P_s (T(x,t)) \frac{\gamma M}{R T(x,t) \rho_0} K_b \right) \\
+    &-\alpha \sqrt{\frac{M}{2 \pi R T(x,t)}}P_{gas}(T(x,t)) (S_g +S_b) \\
+    &= P_s (T(x,t)) \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left(S_g +S_b +\frac{\gamma M}{R T(x,t) \rho_0} (S_g K_g+S_b K_b)  \right) -P_{gas}(T(x,t)) \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} (S_g +S_b)\\
+    &= \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left(  P_0 e^{-\frac{Q_{sub}}{R T(x,t)}}  \left(S_g +S_b +\frac{\gamma M}{R T(x,t) \rho_0} (S_g K_g+S_b K_b)  \right) -\frac{(1-\phi) m_g (t)  R T(x,t)}{M V_g \phi}  (S_g +S_b) \right)
+\end{align*}
+\subsection{Physics behind the PDE}
+A crucial term in the PDE is the thermal conductivity given by 
+\[
+k(\phi,r_b,r_g) = k_0 (T(x,t)) (1-\phi) \frac{r_b}{r_g}.
+\]
+This is not only interesting as it links the PDE to the ODE, but also as makes sure, that not only second derivatives of temperature are in the PDE but also first.
+
+
+
+
+\subsection{The Pipeline}
+We solve the ODE via implicit Euler with step size $\tau >0$
 \[
 m_g (t+\tau) = m_g (t)+ \tau \left( J_{v,g} (t+\tau) S_{v,g} (t+\tau) +  J_{b,g} (t+\tau) S_{b,g} (t+\tau) \right).
 \]
@@ -247,81 +296,8 @@ where $\rho_0$ is ???. Using this the Radii are calculated as
 \]
 Finally, we do one time step of the PDE and update the temperature.
 
-\subsection{Connecting the PDE to the ODE}
-We model the the change of gas mass ($m_b,m_g$) via the Kelvin equation (ODE) and then update the volume ($V_b,V_g$) of a microstructure by 
-
-The radii are a little harder to update. They are 
-
-where $v_b$ and $v_g$ are complicated functions, that will be mentioned later.
 
 
-
-
-
-The change of Volume of the grains is dependend on the radius of the grains at a given time, i.e. 
-\[
-\frac{d}{dt} V_g (r_g (t),r_b (t)) = \frac{\partial}{\partial r_g} V_g (r_g (t),r_b (t)) \frac{d}{dt} r_g (t) + \frac{\partial}{\partial r_b}V_g (r_g (t),r_b (t))  \frac{d}{dt} r_b (t) = - \frac{J_{gp}(y,T(x,t))}{\rho_{ice}},
-\]
-although we used in the last equation the result from the paper. The volumes from the bounds is in similiar fasion 
-\[
-\frac{d}{dt} V_b (r_g (t),r_b (t)) = \frac{\partial}{\partial r_g} V_b (r_g (t),r_b (t)) \frac{d}{dt} r_g (t) + \frac{\partial}{\partial r_b}  V_b (r_g (t),r_b (t)) \frac{d}{dt} r_b (t) =  \frac{J_{pb}(y,T(x,t))}{\rho_{ice}},
-\]
-lthough we used in the last equation the result from the paper. As both these equations need to be satisfied, the following set of euqations follow 
-\[
-\frac{d}{dt} \begin{pmatrix}
-    V_g \\ V_b
-\end{pmatrix} = \underbrace{\begin{pmatrix}
-    \frac{\partial}{\partial r_g} V_g &  \frac{\partial}{\partial r_b} V_g \\
-     \frac{\partial}{\partial r_g} V_b &  \frac{\partial}{\partial r_b} V_b
-\end{pmatrix}}_{=: J} \frac{d}{dt} \begin{pmatrix}
-    r_g \\ r_b
-\end{pmatrix} = \frac{1}{\rho_{ice}} \begin{pmatrix}
-    -J_{gp} \\ J_{pb}
-\end{pmatrix}.
-\]
-Thus the ODE in (\ref{ODE}) to be solved is 
-\[
-\frac{d}{dt} \begin{pmatrix}
-    r_g \\ r_b
-\end{pmatrix} = J^{-1} \frac{1}{\rho_{ice}} \begin{pmatrix}
-    -J_{gp} \\ J_{pb}
-\end{pmatrix}.
-\]
-Here specifically 
-\[
-V_g (r_g ,r_b) := \frac{4}{3} \pi r^3_g, \quad V_b (r_g,r_b) := \frac{\pi r_b^4}{2 r_g}
-\]
-and 
-\begin{align*}
-&J_{gp} (y(x,t),T(x,t)) \approx C_{gp} \frac{p_{sat}(T(x,t)) }{T(x,t)^{3/2}} r_g(t), \quad J_{pb} (y(x,t),T(x,t)) \approx C_{pb} \frac{p_{sat} (T(x,t)) }{T(x,t)^{3/2}} \frac{r_g^2(t)}{r_b(t)}, \\
-&p_{sat} (T(x,t)) \approx p_0 e^{- \frac{\Delta H_{sub}}{R T(x,t)}},
-\end{align*}
-where $C_{gp}, C_{pb}, \Delta H_{sub}, p_0 \in \mathbb{R}$ are model specific constants. Then 
-\[
-J (r_g,r_b) = \begin{pmatrix}
-    4 \pi r^2_g & 0 \\
-    - \frac{\pi r_b^4}{2 r_g^2} & \frac{2 \pi r_b^3}{r_g}
-\end{pmatrix}.
-\]
-Thus the ODE to be solved is 
-\[
-\frac{d}{dt} \begin{pmatrix}
-    r_g \\ r_b
-\end{pmatrix} = \begin{pmatrix}
-    4 \pi r^2_g & 0 \\
-    - \frac{\pi r_b^4}{2 r_g^2} & \frac{2 \pi r_b^3}{r_g}
-\end{pmatrix}^{-1}  \frac{1}{\rho_{ice}} p_0 e^{- \frac{\Delta H_{sub}}{R T(x,t)}} \begin{pmatrix}
-    -C_{gp} \frac{1}{T(x,t)^{3/2}} r_g(t) \\ C_{pb} \frac{1}{T(x,t)^{3/2}} \frac{r_g^2(t)}{r_b(t)}
-\end{pmatrix},
-\]
-where $C_{gp}, C_{pb}, \Delta H_{sub}, p_0, \rho_{ice},R \in \mathbb{R}$ have to be chosen in a reasonable way.
-\subsection{Connecting the ODE to the PDE}
-The PDE numerical method for the PDE is almoust solved. What is left is to determine the functions $c_p, \rho, k$. Define
-\begin{align*}
-&c_p (y(t)) \equiv c_{p,ice} \in \mathbb{R}, \quad \rho (y(t)) := \rho_{ice} (1- \phi (y(t)) ), \quad k(y(t)) \approx k_{ice} (1- \phi ((t)))
- \left( \frac{r_b}{r_g} \right)^\alpha  \\
-& \phi (y(t)) := \phi_{initial} \left( 1- \frac{r_b(t)}{r_g(t)} \right), \quad \phi_{initial},k_{ice},\rho_{ice} \in \mathbb{R}, \alpha >0, \quad y(t) = (r_g(t),r_b(t))^T.
- \end{align*}
 
 \subsection{Stiffness of the Problem}
 
