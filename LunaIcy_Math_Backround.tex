@@ -46,9 +46,14 @@
 
 \chapter*{LunaIcy numerics of ODEs and PDEs}
 \section{Mathematical Derivation of the Main Problem}
-In hign sight of the upcoming missions planned to Jupiters moon Europa such as JUICE and even mission that will attempt to drill through the ice sheet, the geometry of the ice grains are of great interest in order to succefully navigate such a mission! This little report explains the Paper ???.\\
-Consider a one dimensional slice of the Ice sheet of Jupiters moon Europa. This is our state space $\Omega := [0,d] \subset \mathbb{R}$ where $d$ denotes the depth od the ice sheet. This model attempts to model the changing ice grains and their bonds to their neighboring grains such that a steady state (fixed point of the dynamic system) is reached that aims to explain the ice grain and bond size in the ice sheet of Europa.\\
-BILD\\
+In light of the upcoming missions planned to Jupiters moon Europa such as JUICE and even mission that will attempt to drill through the ice sheet, the geometry of the ice grains are of great interest in order to succefully navigate such a mission! This little report explains the Paper ???. There it was proposed that the low thermal inertia of the porous ice can gives way for us to presume that the depth of significant tenperature changes before dissipating is very low (only a few centimeters). Thus in the following study of the ice sheets microstructure changes due to sintering can be limited to only a small gird. Further, at the bottom for the to be defined heat equation we can use Neumann boundary data that ensures that the temperature change has vanished, when reaching the bottom.\\
+Consider a one dimensional slice of the Ice sheet of Jupiters moon Europa. This is our state space $\Omega := [0,d] \subset \mathbb{R}$ where $d$ denotes the depth od the ice sheet. This model attempts to model the changing ice grains and their bonds to their neighboring grains such that a steady state (fixed point of the dynamic system) is reached that aims to explain the ice grain and bond size in the ice sheet of Europa.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{Pictures/Geometry.png}
+  \caption{}
+  \label{}
+\end{figure}
 In every state in $\Omega$ we denote the microstructure $y(x,t) := (r_g (x,t) , r_b (x,t))^T$, where $r_g$ is the grain radius and $r_b$ is the bond radius is modelled by the system of ODEs for every $x \in \Omega$ as 
 \begin{equation}
 \label{ODE}
@@ -103,21 +108,34 @@ The Flux of a grain or a bond is then given by
 \[
 J_i (t) := \alpha (P_{K_i} (t) - P_{gas} (t)) \sqrt{\frac{M}{2 \pi R T(x,t)}}, \quad i = g,b,
 \]
-where $\alpha, R, M \in \mathbb{R}$ are constants and $T(x,t)$ denotes the temperature of the grain at point $x \in [0,d]$ at time $t\geq 0$. The curved surface pressure of $K_j$ is given by 
+where $\alpha, R, M \in \mathbb{R}$ are constants and $T(x,t)$ denotes the temperature of the grain at point $x \in [0,d]$ at time $t\geq 0$. Here $\alpha$ is the sticking coefficient $R$ is the universal molar gas constant and $M$ the molar mass of water. The curved surface pressure of $K_j$ is given by 
 \[
 P_{K_j } (t) := P_{sat} (T(x,t)) \left( 1+ \frac{\gamma M}{R T(x,t) \rho_0} K_j (t) \right), \quad j=g,b,
 \] 
-where $\gamma,\rho_0, R, M \in \mathbb{R}$ are constants and $P_{sat}(T(x,t))= P_0 e^{-\frac{Q_{sub}}{RT(x,t)}}$ is the saturated water pressure of a flat surface (???). Here $P_0,Q_{sub},R \in \mathbb{R}$ are constants. Further, 
+where $\gamma,\rho_0 \in \mathbb{R}$ are constant, where $\gamma$ is the water surface tension and $\rho_0$ the bulk ice density. $P_{sat}(T(x,t))= P_0 e^{-\frac{Q_{sub}}{RT(x,t)}}$ is the saturated water pressure of a flat surface. Here $P_0,Q_{sub} \in \mathbb{R}$ are constants, where $P_0$ is called high temperature pressure limit, as theoreticall the temperature goes to infinity this saturated water pressure of a flat surface will be equal to $P_0 \cdot 1$. $Q_{sub}$ is the activation energy for sublimation.  Further, 
 \[
-P_{gas} (T(x,t)) := \frac{m_g (t) R T(x,t)}{M V_{pore}} =\frac{(1-\phi) m_{gas} (t) \rho_0 R T(x,t)}{M V_g \phi}, \quad  V_{pore} := V_g \frac{\phi}{1-\phi} ,
+P_{gas} (T(x,t)) := \frac{m_g (t) R T(x,t)}{M V_{pore}} =\frac{(1-\phi) m_{gas} (t) R T(x,t)}{M V_g \phi}, \quad  V_{pore} := V_g \frac{\phi}{1-\phi} ,
 \]
-where $V_g$ denotes the volume of the grain, $m_{gas}$ the equilibrium mass of water vapor mass, ...???.
+where $V_g$ denotes the volume of the grain, $m_{gas}$ the equilibrium mass of water vapor mass and $\phi$ denotes the porosity.
 \subsection{Physics behind the PDE}
-A crucial term in the PDE is the thermal conductivity given by 
+The lower boundary data was described in the introduction. Here we will briefly describe the upper boundery data. Remember that 
+\[
+k(0,t) \frac{\partial}{\partial x}  T(0,t) = - F_{solar} (t) + \epsilon \sigma_{SB} T(0,t)^4. 
+\]
+The function $F_{solar}$ gives us the day and night cycle (eclipses by Jupiter and other moons is omitted) and the term $\epsilon \sigma_{SB} T(0,t)^4$ describes the thermal radiation from the surface into the vacuum, where $\epsilon$ denotes the emissivity of the ice surface, i.e. the efficiency at radiating thermal engery to a perfect black body. $\sigma_{SB}$ is the fundamental Stefan-Boltzmann constant. The first summand is defined in the $\lambda$ latitude and $\psi$ longitude as
+\[
+F_{solar } (t, \lambda, \psi) := (1- A(\lambda, \psi)) \frac{G_{sc}}{d(t)^2} \cos (\theta_i (t,\lambda,\psi)) \textbf{1}_{\{ \cos (\theta_i (t,\lambda,\psi))>0 \}},
+\]
+where $A$ is the surface albeto, $G_{sc}$ the solar constant and $\theta_i$ is the solar incidence angle abd $d(t)$ is the distance to the sun. Note that using this indicator function we can easily model the day and night cycle. \\ 
+The other terms in the heat eqaution are described as follows. 
+\[
+\rho (\phi) = \rho_0 (1- \phi)
+\]
+is the density of porous ice, $c_p$ is the ice heat capacity constant. Note that the paper reasons that we can choose these two as constant, as it argues that the sintering process on Europa is primarly driven by evaporation and condensation, i.e. the pores void is assumed to stay constant and the thermal conductivity given by 
 \[
 k(\phi,r_b,r_g) = k_0 (T(x,t)) (1-\phi) \frac{r_b}{r_g}.
 \]
-This is not only interesting as it links the PDE to the ODE, but also as makes sure, that not only second derivatives of temperature are in the PDE but also first.
+This last term is here links the PDE to the ODE.
 
 \section{Numerical Solution of the ODE}
 \subsection{Deriving the ODE}
@@ -252,7 +270,7 @@ changed in a shorter time than its ice crust age? For simplifications, we answer
 \section{Geometry}
 Here the volumes of the grains and bonds will be determined, as they are essential in the dynamics of the model.
 \subsection{Grain Volume}
-The set 
+We begin by calulcating $1/4$ of the grains volume, where it is cut of at $\hat{x}^*$ at the $x_1 $ axis. This is the volume of the following set:
 \[
 V^{r_g} := \{ x \in \mathbb{R}^3 \mid |x| < r_g, 0 \leq x_1 < \hat{x}^*, 0 \leq x_2 \}.
 \]
@@ -313,16 +331,66 @@ Thus in total it holds for $\hat{x}^* \leq r_g$ that
 &\int_{V^{r_g}}  d^3 x= \int_0^{r_g} r^2 \text{1}_{0 \leq r < \hat{x}^*} \left( \pi - 2 \cdot 0\right)+ r^2 \left( \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta \right)  \text{1}_{ \hat{x}^*< r \leq r_g}  d r \\
 &= \pi \frac{(\hat{x}^*)^3}{3}+\pi \left( \frac{r_g^3}{3} - \frac{(\hat{x}^*)^3}{3} \right) - 2\int^{r_g}_{\hat{x}^*} r^2 \underbrace{\int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta}_{=: A(\hat{x}^*,r)} dr.
 \end{align*}
-Note that $A(\hat{x}^*,r)$ does not have an analytical solution and needs to be solved numerically.
+Note that $A(\hat{x}^*,r)$ does not have an analytical solution and needs to be solved numerically. Note that we only calculated $1/4^{th}$ of its volume, i.e. we need to multiply the resulting value by $4$.
 \subsection{Bond Volume}
-...
+The area of interest is 
+\[
+V^{r_b} := \{x \in \mathbb{R}^3 \mid 0 \leq x_1 \leq r_g -\hat{x}^*, \sqrt{x_2^2 + x_3^2} \leq r_b + r_p - \sqrt{r_p^2 -x_1^2}  \}
+\]
+Its Volume is easily given by 
+\begin{align*}
+&\int_{V^{r_p}} d^3 x = \int_0^{r_g - \hat{x}^*} \int_{\{ \sqrt{x_2^2+x_3^2 } \leq r(x_1) \}} d^2 (x_2,x_3) dx_1 = \int_0^{r_g - \hat{x}^*}  \pi r(x_1)^2 dx_1 \\
+&= \int_0^{r_g - \hat{x}^*}  \pi (r_b + r_p)^2 dx_1  -2 (r_b + r_p)\underbrace{\pi \int_0^{r_g - \hat{x}^*}   \sqrt{r_p^2 -x_1^2}  dx_1}_{=:A} + \pi \int_0^{r_g - \hat{x}^*}  r_p^2 - \pi \int_0^{r_g - \hat{x}^*}  x^2 dx
+\end{align*}
+altough we denote $r(x_1) :=  r_b + r_p - \sqrt{r_p^2 -x_1^2} $. This is then 
+\begin{align*}
+A &= \pi \left[  \frac{x_1}{2} \sqrt{r_p^2 -x_1^2} + \frac{r_p^2}{2} arcsin\left( \frac{x_1}{r_p} \right) \right]_0^{r_g-\hat{x}^*} \\
+&=  \pi \left(  \frac{r_g - \hat{x}^*}{2} \sqrt{r_p^2 -(r_g - \hat{x}^*)^2} + \frac{r_p^2}{2} arcsin\left( \frac{r_g - \hat{x}^*}{r_p} \right)\right) 
+\end{align*}
+Thus in total we have 
+\begin{align*}
+    \int_{V^{r_p}} d^3 x &= \pi (r_b + r_p)^2 (r_g - \hat{x}^*) - 2(r_b + r_p) \pi \left(  \frac{r_g - \hat{x}^*}{2} \sqrt{r_p^2 -(r_g - \hat{x}^*)^2} + \frac{r_p^2}{2} arcsin\left( \frac{r_g - \hat{x}^*}{r_p} \right)\right)  \\
+    &+ \pi r_p^2 (r_g - \hat{x}^*) - \frac{\pi}{3} (r_g - \hat{x}^*)^3
+\end{align*}
+We can determine $r_p$ due to the fact that
+\[
+(r_g +r_p)^2 = r_g^2 + (r_b+r_p)^2 
+\]
+and solving it 
+\[
+r_p = \frac{r_b^2}{2(r_g - r_b)}.
+\]
+
+
+
+
 \subsection{Surface Area and Curvature}
 The Surface area is in this model of crucial importance, as it models the exchange of water vapor mass. For the grain and the bond we can easily calculate it from our derivation above. The grains surface area is given by 
 \[
 S_g := r_g^2 \cdot \left( \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r_g})} \sqrt{1- \left( \frac{\hat{x}^*}{r_g \cos (\theta)} \right)^2}  d \theta  \right)
 \]
-and the surface area of the grain is ...\\
-The curvature of the grain is $K_g = \frac{2}{r_g}$
+and the surface area of the grain is given by the volume of the following set 
+\[
+S^{r_b} := \{ x \in \mathbb{R}^3 \mid 0 \leq x_1 \leq r_g -\hat{x}^*, \sqrt{x_2^2+x_3^2} = r(x_1) \}
+\]
+which is
+\begin{align*}
+   S_b:= \int_{S_b} d \sigma (z) = \int_0^{2 \pi} \int_0^{r_g -\hat{x}^*} \sqrt{\det ((D\Phi (x,\theta))^T D\Phi(x,\theta))} dx d \theta
+\end{align*}
+where $\Phi: [0,r_g -\hat{x}^*] \times [0,2\pi) \to \mathbb{R}^3, (x,\theta) \mapsto (x,r(x) \cos (\theta),r(x) \sin (\theta))$. Then we get the Jacobian 
+\[
+D \Phi = \begin{pmatrix}
+    1 & 0 \\
+    r^\prime (x) \cos (\theta) & - r(x) \sin (\theta)\\
+    r^\prime (x) \sin (\theta) & r(x) \cos (\theta)
+\end{pmatrix}.
+\]
+and thus 
+\begin{align*}
+S_b &= \int_0^{2 \pi} \int_0^{r_g -\hat{x}^*} r(x) \sqrt{1+ r^\prime (x)^2} dx d \theta \\
+&= 2 \pi \int_0^{r_g -\hat{x}^*} r(x) \sqrt{1+ \frac{x^2}{r_p^2 -x^2 } } dx = 2 \pi r_p \left( (r_b + r_p) arcsin (\frac{r_g-\hat{x}^*}{r_p} ) - (r_g - \hat{x}^*) \right).
+\end{align*}
+The curvature of the grain is $K_g = \frac{2}{r_g}$ and of the bond $K_b = \frac{2}{r_b}$ repectively.
 
 
 

@@ -1,300 +1,249 @@
 import numpy as np
-from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-import sys
+from scipy.optimize import root
+from scipy.integrate import quad
 
-# --- 1. Constants Block ---
-# --- Physical Constants ---
-R_GAS = 8.314                # J / (mol K) - Ideal gas constant
-SIGMA_SB = 5.67e-8            # W / (m^2 K^4) - Stefan-Boltzmann constant
-RHO_ICE = 917.0               # kg / m^3 - Density of solid ice
-CP_ICE = 2108.0               # J / (kg K) - Specific heat of ice (constant approx.)
-K_ICE = 2.3                   # W / (m K) - Thermal conductivity of solid ice
+# ==========================================
+# 1. PHYSICAL CONSTANTS & PARAMETERS
+# ==========================================
+R = 8.314          # Universal gas constant [J/(mol K)]
+M = 0.018015       # Molar mass of water [kg/mol]
+rho0 = 917.0       # Density of bulk ice [kg/m^3]
+gamma = 0.065      # Surface tension of ice [N/m]
+P0 = 3.5e12        # Pre-exponential factor [Pa]
+Q_sub = 51000.0    # Sublimation energy [J/mol]
 
-# --- Sintering Physics (from "LunaIcy" & "MultIHeaTS") ---
-P_SAT_A = 28.87               # unitless
-P_SAT_B = 6141.7              # K (related to Delta H_sub / R)
+# Simulation specific
+alpha = 0.03       # Sticking coefficient
+T_celsius = -3.0
+T = 273.15 + T_celsius
+phi = 0.3          # Porosity (used for m_gas calculation)
 
-# *** FIX 1: RE-TUNED CONSTANTS ***
-# My previous guesses (1e-24, 1e-22) were all far too small
-# because the p_sat(T) term at 139K is ~1e-20.
-# We need a much, much larger constant to compensate.
-C_GP = 1e-11                  # (kg K^1.5) / (m^2 s Pa) - Tuned for this problem
-C_PB = 1e-11                  # (kg K^1.5 m) / (m^2 s Pa) - Tuned for this problem
-ALPHA_K = 0.5                 # Exponent for k(y) model
-PHI_INITIAL = 0.4             # Initial porosity (loose sphere packing)
+# NUMERICAL SCALING FACTORS
+# We compute geometry in microns to avoid machine epsilon issues with 1e-18 numbers
+L_SCALE = 1e-6     
+V_SCALE = L_SCALE**3
+A_SCALE = L_SCALE**2
 
-# --- Simulation & Planetary Parameters ---
-DEPTH_D = 100.0                # m - Total depth of the simulation domain
-N_GRID = 500                  # Number of grid points
-H_GRID = DEPTH_D / (N_GRID - 1) # m - Grid spacing
+# ==========================================
+# 2. GEOMETRY FUNCTIONS (The LunaIcy Model)
+# ==========================================
 
-# Boundary Condition Parameters
-EPSILON = 0.95                # Emissivity of the ice surface
-ALBEDO = 0.6                  # Bond albedo of Europa
-F_SUN_JUPITER = 50.4          # W / m^2 - Mean solar flux at Jupiter
-F_SOLAR_AVG = (1.0 - ALBEDO) * F_SUN_JUPITER  # ~20.16 W/m^2
+def get_rp(rg, rb):
+    """Calculates pore/fillet radius based on user formula."""
+    # rg, rb in MICRONS
+    if rg <= rb: return 1e-9
+    # Formula: rp = rb^2 / (2*(rg - rb))
+    return (rb**2) / (2 * (rg - rb))
 
-# Simulation Time
-T_YEAR = 3600.0 * 24.0 * 365.25 # Seconds in one year
-T_SPAN = (0.0, 1e6 * T_YEAR)    # 1 Million Years
-
-# We only need the start and end points for this plot
-T_EVAL = np.array([T_SPAN[0], T_SPAN[1]])
-
-# Epsilon for numerical stability
-EPS_NUM = 1e-15
-
-
-# --- 2. Physics & Coupling Functions ---
-# (These are all correct)
-
-def p_sat_func(T_clipped):
-    """Calculates saturation vapor pressure (Pa)"""
-    # Assumes T is already clipped
-    return np.exp(P_SAT_A - P_SAT_B / T_clipped)
-
-def porosity_func(rg, rb):
-    """Porosity phi(y) model"""
-    ratio = np.clip(rb / (rg + EPS_NUM), 0, 1)
-    return PHI_INITIAL * (1.0 - ratio)
-
-def rho_func(rg, rb):
-    """Bulk density rho(y) (kg/m^3)"""
-    phi = porosity_func(rg, rb)
-    return (1.0 - phi) * RHO_ICE
-
-def cp_func(rg, rb):
-    """Specific heat cp(y) (J/kg/K)"""
-    return CP_ICE # Constant
-
-def k_func(rg, rb):
-    """Thermal conductivity k(y) (W/m K)"""
-    phi = porosity_func(rg, rb)
-    ratio = np.clip(rb / (rg + EPS_NUM), 0, 1)
-    k_min = 0.02 # Approx conductivity of vacuum
-    k_eff = k_min + (K_ICE - k_min) * (1 - phi) * (ratio**ALPHA_K)
-    return k_eff
-
-# --- 3. Sintering Rate Function (f(y, T)) ---
-
-def sintering_rate(y, T):
+def get_geometry_scaled(vars_micron):
     """
-    Calculates the sintering rate [drg/dt, drb/dt]
-    y = [rg, rb]
+    Computes Volumes (m^3), Areas (m^2), and rp (m) 
+    Input: [rg, rb] in MICRONS
     """
+    rg_um, rb_um = vars_micron
     
-    # The NaN-Killer: Clamp T at a physical minimum
-    T_clipped = np.maximum(T, 50.0)
+    # 1. Geometric Safety & Constraints
+    if rb_um <= 1e-9: rb_um = 1e-4 # Avoid div by zero
+    if rb_um >= rg_um * 0.99: rb_um = rg_um * 0.99
     
-    rg, rb = y
+    rp_um = get_rp(rg_um, rb_um)
     
-    # The physical brake
-    ratio = rb / (rg + EPS_NUM)
-    if ratio >= 1.0 or rg <= EPS_NUM:
-        return [0.0, 0.0]
-    
-    # Add a smooth limiting factor
-    limiter = (1.0 - ratio)**2 
-    
-    # --- Build Jacobian J ---
-    J_11 = 4.0 * np.pi * (rg**2)
-    J_12 = 0.0
-    J_21 = -np.pi * (rb**4) / (2.0 * (rg**2 + EPS_NUM))
-    J_22 = 2.0 * np.pi * (rb**3) / (rg + EPS_NUM)
-    
-    det_J = J_11 * J_22 - J_12 * J_21
-    
-    if np.abs(det_J) < EPS_NUM:
-        return [0.0, 0.0]
+    # 2. Find Intersection x* (height where grain meets bond)
+    # Using the rigorous geometric definition: 
+    # Height_Grain(x*) = Height_Bond(x*)
+    def h_diff(x):
+        # Height of Grain sphere
+        hg = np.sqrt(max(0, rg_um**2 - x**2))
+        # Height of Bond torus/fillet
+        # The fillet is a circle of radius rp centered at (rg, rb+rp)
+        # Equation: (x - rg)^2 + (y - (rb+rp))^2 = rp^2
+        # y = (rb+rp) - sqrt(rp^2 - (rg-x)^2)
+        hb = (rb_um + rp_um) - np.sqrt(max(0, rp_um**2 - (rg_um - x)**2))
+        return hg - hb
 
-    # --- Build Source Vector S ---
-    # Use T_clipped for ALL T-dependent terms
-    psat = p_sat_func(T_clipped)
-    T_term = T_clipped**(-1.5)
-    psat_T_term = psat * T_term
-    
-    J_gp = C_GP * psat_T_term * rg
-    J_pb = C_PB * psat_T_term * (rg**2) / (rb + EPS_NUM)
-    
-    S_1 = (-J_gp / RHO_ICE)
-    S_2 = (J_pb / RHO_ICE)
-    
-    # --- Solve f = J_inv * S ---
-    drg_dt = (1.0 / det_J) * (J_22 * S_1 - J_12 * S_2)
-    drb_dt = (1.0 / det_J) * (-J_21 * S_1 + J_11 * S_2)
-    
-    # Apply the limiter to the final rates
-    drg_dt *= limiter
-    drb_dt *= limiter
-            
-    return [drg_dt, drb_dt]
+    # Bracket search for x* between 0 and rg
+    try:
+        # Standard brentq is fast and robust
+        from scipy.optimize import brentq
+        x_star_um = brentq(h_diff, 0, rg_um * 0.9999)
+    except:
+        # Fallback if geometry is degenerate (very rare)
+        x_star_um = rg_um * 0.9 
 
-
-# --- 4. The Main ODE System (for solve_ivp) ---
-# (This section is identical and correct)
-
-def ode_system(t, U_flat):
-    """
-    This is the function for the ODE solver, implementing YOUR
-    ghost-cell method and quasi-static approximation.
-    U_flat is a 1D vector: [rg0, rb0, T0, rg1, rb1, T1, ...]
-    """
+    # 3. Surface Areas (Integrals)
+    # S_g: Grain Area
+    def integrand_Sg(theta):
+        val = 1 - (x_star_um / (rg_um * np.cos(theta)))**2
+        return np.sqrt(max(0, val))
     
-    # Reshape the 1D state vector into a 2D N_GRID x 3 array
-    # U = [ [rg_0, rb_0, T_0], [rg_1, rb_1, T_1], ... ]
-    U = U_flat.reshape((N_GRID, 3))
-    rg = U[:, 0]
-    rb = U[:, 1]
-    T = U[:, 2]
+    limit = np.arccos(min(1.0, x_star_um/rg_um))
+    val_Sg, _ = quad(integrand_Sg, 0, limit)
+    # Multiplied by 4 per user note/symmetry
+    Sg_um2 = 4 * (rg_um**2 * (np.pi - 2 * val_Sg))
     
-    # Create the 1D derivative vector, initialized to zeros
-    dUdt_flat = np.zeros_like(U_flat)
-    dUdt = dUdt_flat.reshape((N_GRID, 3))
-    drg_dt = dUdt[:, 0]
-    drb_dt = dUdt[:, 1]
-    dT_dt = dUdt[:, 2]
-
-    # --- A. Calculate Physics Properties at all nodes ---
-    k_nodes = k_func(rg, rb)
-    rho_nodes = rho_func(rg, rb)
-    cp_nodes = cp_func(rg, rb)
-    inv_rho_cp = 1.0 / (rho_nodes * cp_nodes + EPS_NUM)
+    # S_b: Bond Area (Explicit formula)
+    L_um = rg_um - x_star_um
+    term_asin = np.arcsin(min(1.0, L_um/rp_um))
+    Sb_um2 = 2 * np.pi * rp_um * ((rb_um + rp_um)*term_asin - L_um)
     
-    # --- B. Sintering ODEs (Loop over all nodes) ---
-    s_rates = [sintering_rate(U[i, 0:2], U[i, 2]) for i in range(N_GRID)]
-    s_rates = np.array(s_rates)
-    drg_dt[:] = s_rates[:, 0]
-    drb_dt[:] = s_rates[:, 1]
+    # 4. Volumes (Integrals)
+    # V_g: Grain Volume
+    def A_func(r): 
+        # The inner integral A(x*, r) from the notes
+        if r < x_star_um: return 0
+        up = np.arccos(min(1.0, x_star_um/r))
+        def sub(th): return np.sqrt(max(0, 1-(x_star_um/(r*np.cos(th)))**2))
+        v, _ = quad(sub, 0, up)
+        return v
+    
+    def rad_int(r):
+        return r**2 * (np.pi - 2*A_func(r))
+    
+    V_outer, _ = quad(rad_int, x_star_um, rg_um)
+    V_inner = (np.pi * x_star_um**3)/3.0
+    Vg_um3 = 4 * (V_inner + V_outer)
+    
+    # V_b: Bond Volume (Explicit formula)
+    t1 = np.pi * (rb_um + rp_um)**2 * L_um
+    sq_term = np.sqrt(max(0, rp_um**2 - L_um**2))
+    t2 = 2*(rb_um + rp_um)*np.pi*((L_um/2)*sq_term + (rp_um**2/2)*term_asin)
+    t3 = np.pi * rp_um**2 * L_um
+    t4 = (np.pi/3) * L_um**3
+    Vb_um3 = t1 - t2 + t3 - t4
+    
+    # 5. Return in SI Units (Meters)
+    return (Vg_um3 * V_SCALE, Vb_um3 * V_SCALE, 
+            Sg_um2 * A_SCALE, Sb_um2 * A_SCALE, 
+            rp_um * L_SCALE)
 
-    # --- C. PDE (Loop over ALL nodes, 0 to N-1) ---
-    # We use your GHOST-CELL method.
-    for i in range(N_GRID):
+# ==========================================
+# 3. SIMULATION LOOP (Method of Lines)
+# ==========================================
+
+def run_simulation(r0_meters):
+    # --- Initialization ---
+    rg_um = r0_meters / L_SCALE
+    rb_um = rg_um * 0.15 # Start with a small 15% neck
+    
+    # Physics constants pre-calculation
+    P_sat = P0 * np.exp(-Q_sub / (R * T))
+    Kelvin_Base = (gamma * M) / (R * T * rho0)
+    Flux_Prefactor = alpha * np.sqrt(M / (2 * np.pi * R * T))
+    
+    # Time Stepping Strategy
+    # Large grains sinter strictly slower. We adapt dt and t_max based on size.
+    if r0_meters < 5e-6:      # < 5 micron
+        dt = 0.5; t_max = 5000
+    elif r0_meters < 50e-6:   # < 50 micron
+        dt = 50.0; t_max = 500000 
+    else:                     # Large grains
+        dt = 500.0; t_max = 5e6 
         
-        # --- Define k at half-points k_{i+1/2} and k_{i-1/2} ---
-        if i < N_GRID - 1:
-            k_plus = 0.5 * (k_nodes[i] + k_nodes[i+1])
-        else:
-            k_plus = k_nodes[i] # At i=d, k_{d+1/2} approx as k_d
-            
-        if i > 0:
-            k_minus = 0.5 * (k_nodes[i] + k_nodes[i-1])
-        else:
-            k_minus = k_nodes[i] # At i=0, k_{-1/2} approx as k_0
+    t_vals = []
+    ratio_vals = []
+    current_time = 0
+    
+    # Initial Mass
+    Vg, Vb, Sg, Sb, rp = get_geometry_scaled([rg_um, rb_um])
+    m_g = Vg * rho0
+    m_b = Vb * rho0
+    
+    print(f"Simulating r0={rg_um}um | T={T:.1f}K | P_sat={P_sat:.2e} Pa")
 
-        # --- Define T at neighbor points T_{i+1} and T_{i-1} ---
-        if i == 0:
-            # Surface: Calculate T_{-1} from your formula
-            T_plus = T[i+1]
-            T_m1_ghost = T[i+1] + (2 * H_GRID / (k_nodes[i] + EPS_NUM)) * \
-                         (F_SOLAR_AVG - EPSILON * SIGMA_SB * T[i]**4)
-            T_minus = T_m1_ghost
+    while current_time < t_max:
+        # --- A. Physics Update ---
         
-        elif i == N_GRID - 1:
-            # Bottom: Calculate T_{d+1} from your formula
-            T_p1_ghost = T[i-1] # T_{d+1} = T_{d-1}
-            T_plus = T_p1_ghost
-            T_minus = T[i-1]
-            
-        else:
-            # Interior: Standard neighbors
-            T_plus = T[i+1]
-            T_minus = T[i-1]
-
-        # --- Calculate Fluxes and dT/dt ---
-        flux_plus = k_plus * (T_plus - T[i])
-        flux_minus = k_minus * (T[i] - T_minus)
+        # 1. Curvatures
+        Kg = 2.0 / (rg_um * L_SCALE)
+        Kb = -1.0 / rp  # Concave neck (Negative Curvature)
         
-        dT_dt[i] = inv_rho_cp[i] * (flux_plus - flux_minus) / (H_GRID**2)
+        # 2. Surface Pressures (EXPONENTIAL FORM)
+        # Using exp ensures P > 0 and prevents the "inverted" artifact
+        P_Kg = P_sat * np.exp(Kelvin_Base * Kg)
+        P_Kb = P_sat * np.exp(Kelvin_Base * Kb)
+        
+        # 3. Equilibrium Gas Pressure
+        # Derived from dm_gas/dt = 0 => Sum(Flux*Area) = 0
+        # P_gas = (P_Kg*Sg + P_Kb*Sb) / (Sg + Sb)
+        P_gas = (P_Kg * Sg + P_Kb * Sb) / (Sg + Sb)
+        
+        # (Optional) Recover m_gas for the record, though not used for flux
+        m_gas = (P_gas * M * Vg * phi) / ((1 - phi) * R * T)
+        
+        # 4. Fluxes (Hertz-Knudsen)
+        J_g = Flux_Prefactor * (P_Kg - P_gas) # > 0 (Sublimation)
+        J_b = Flux_Prefactor * (P_Kb - P_gas) # < 0 (Deposition)
+        
+        # --- B. Mass Update (Explicit Euler) ---
+        dm_g = -J_g * Sg * dt
+        dm_b = -J_b * Sb * dt
+        
+        m_g += dm_g
+        m_b += dm_b
+        
+        # --- C. Inverse Geometry Problem ---
+        # We need to find [rg, rb] that match the new masses m_g, m_b
+        target_Vg = m_g / rho0
+        target_Vb = m_b / rho0
+        
+        def residuals(x):
+            # x is [rg, rb] in microns
+            # Penalize unphysical geometries to guide solver
+            if x[1] >= x[0] or x[1] <= 1e-5: return [1e5, 1e5]
+            
+            v_g_new, v_b_new, _, _, _ = get_geometry_scaled(x)
+            
+            # Normalized Error (Fractional)
+            # (Calculated - Target) / Target
+            err_g = (v_g_new - target_Vg) / target_Vg
+            err_b = (v_b_new - target_Vb) / target_Vb
+            return [err_g, err_b]
+        
+        # 'hybr' is robust for systems of non-linear equations
+        sol = root(residuals, [rg_um, rb_um], method='hybr', tol=1e-4)
+        
+        if sol.success:
+            rg_um, rb_um = sol.x
+        else:
+            # If solver fails, simulation likely reached geometric limit
+            break
+            
+        # Record Data
+        current_time += dt
+        t_vals.append(current_time)
+        ratio_vals.append(rb_um / rg_um)
+        
+        # Stop condition (coalescence)
+        if rb_um / rg_um > 0.65: break 
+        
+    return t_vals, ratio_vals
 
-    return dUdt_flat
+# ==========================================
+# 4. PLOTTING (Replicating Figure 3)
+# ==========================================
+plt.figure(figsize=(10, 7))
 
-# --- 5. Setup and Run Simulation ---
-# (This section is identical and correct)
+# Simulate the three sizes mentioned in typical sintering papers
+grain_sizes = [1e-6] 
+colors = ['blue', 'orange', 'green']
 
-print("Setting up initial conditions...")
-sys.stdout.flush()
-
-x_grid = np.linspace(0, DEPTH_D, N_GRID)
-
-U_initial_flat = np.zeros(N_GRID * 3)
-U_initial = U_initial_flat.reshape((N_GRID, 3))
-
-U_initial[:, 0] = 1e-4  # rg: 100 micron grains
-U_initial[:, 1] = 1e-6  # rb: 1 micron bonds (very small)
-U_initial[:, 2] = 100.0 # T: 100K everywhere
-
-print(f"Initial state at surface: rg={U_initial[0,0]}, rb={U_initial[0,1]}, T={U_initial[0,2]}")
-print(f"Grid spacing h = {H_GRID:.4f} m")
-
-print("Solving ODE system (this will take a moment)...")
-sys.stdout.flush()
-sol = solve_ivp(
-    ode_system, 
-    T_SPAN, 
-    U_initial_flat, 
-    method='BDF', 
-    t_eval=T_EVAL
-)
-print("Simulation complete.")
-sys.stdout.flush()
-
-# --- 6. Process and Plot Results (Depth Profile à la Fig. 7) ---
-# (This plotting section is identical to the last one, with one fix)
-
-if not sol.success:
-    print(f"Solver failed: {sol.message}")
-else:
-    print("Processing depth-profile data...")
+for r0, col in zip(grain_sizes, colors):
+    t_data, r_data = run_simulation(r0)
     
-    # Get the initial state
-    U_initial_profile = U_initial_flat.reshape((N_GRID, 3))
-    # Get the final state (last time point)
-    U_final_profile = sol.y[:, -1].reshape((N_GRID, 3))
+    # Plot
+    label_str = f'$r_g = {r0*1e6:.0f} \mu m$'
+    plt.loglog(t_data, r_data, label=label_str, color=col, linewidth=2)
 
-    # Extract initial and final bond radius (in meters)
-    rb_initial_m = U_initial_profile[:, 1]
-    rb_final_m = U_final_profile[:, 1]
-    
-    # Convert to micrometers (μm) for plotting
-    rb_initial_microns = rb_initial_m * 1e6
-    rb_final_microns = rb_final_m * 1e6
+plt.xlabel('Time (s)', fontsize=12)
+plt.ylabel('Neck Ratio $x = r_b / r_g$', fontsize=12)
+plt.title(f'Sintering of Europa Ice (LunaIcy Simulation)\nT = {T_celsius} °C, $\\alpha$ = {alpha}', fontsize=14)
+plt.grid(True, which="both", ls="-", alpha=0.4)
+plt.legend(fontsize=12)
 
-    print(f"Initial rb at surface: {rb_initial_microns[0]:.2f} μm")
-    print(f"Final rb at surface:   {rb_final_microns[0]:.2f} μm")
-    print(f"Final rb at 3m depth:  {rb_final_microns[int(3/H_GRID)]:.2f} μm")
-    
-    # --- Create the Plot (like the image you sent) ---
-    fig, ax = plt.subplots(figsize=(7, 8))
-    fig.suptitle('Bond Radius Evolution (Fig. 7 style)', fontsize=16)
+# Optional: Add slope guide for visual verification of power law
+# Sintering usually follows x ~ t^(1/n). A slope of 1/5 or 1/6 is common for vapor transport.
+# plt.loglog([10, 1000], [0.3, 0.3 * (1000/10)**(1/5)], 'k--', label='Slope ~ 1/5')
 
-    # Plot initial bond radius (t=0)
-    ax.plot(rb_initial_microns, x_grid, 'b--', label='$r_b(x, 0)$')
-    
-    # Plot final bond radius (t=1 Myr)
-    ax.plot(rb_final_microns, x_grid, 'b-', linewidth=2, label='$r_b(x, t_f)$')
-    
-    # --- Set Axes ---
-    # *** FIX 2: Added r'' to fix SyntaxWarning ***
-    ax.set_xlabel(r'Bond Radius ($\mu\text{m}$)', fontsize=14)
-    ax.set_ylabel('Depth (m)', fontsize=14)
-    
-    # Set Y-axis to log scale
-    ax.set_yscale('log')
-    
-    # Invert Y-axis so 0 is at the top
-    ax.invert_yaxis()
-    
-    # Set y-limits to be similar to the paper's plot
-    ax.set_ylim(DEPTH_D, 1e-3)
-    # Set x-limits to be reasonable (e.g., 0 to 100 microns)
-    ax.set_xlim(left=0, right=100) # 100 microns is the grain size
-    
-    # Add gridlines
-    ax.grid(True, which="both", ls="--", alpha=0.7)
-    
-    # Add legend
-    ax.legend(fontsize=14)
-
-    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.show()
+plt.tight_layout()
+plt.show()
