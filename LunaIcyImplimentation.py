@@ -3,94 +3,75 @@ import matplotlib.pyplot as plt
 from scipy.optimize import root
 from scipy.integrate import quad
 
-# ==========================================
-# 1. PHYSICAL CONSTANTS & PARAMETERS
-# ==========================================
-R = 8.314          # Universal gas constant [J/(mol K)]
-M = 0.018015       # Molar mass of water [kg/mol]
-rho0 = 917.0       # Density of bulk ice [kg/m^3]
-gamma = 0.065      # Surface tension of ice [N/m]
-P0 = 3.5e12        # Pre-exponential factor [Pa]
-Q_sub = 51000.0    # Sublimation energy [J/mol]
-
-# Simulation specific
-alpha = 0.03       # Sticking coefficient
+# --- 1. Constants ---
+R = 8.314          
+M = 0.018015       
+rho0 = 917.0       
+gamma = 0.065      
+P0 = 3.5e12        
+Q_sub = 51000.0    
+alpha = 0.03       
 T_celsius = -3.0
 T = 273.15 + T_celsius
-phi = 0.3          # Porosity (used for m_gas calculation)
+phi = 0.4          
 
-# NUMERICAL SCALING FACTORS
-# We compute geometry in microns to avoid machine epsilon issues with 1e-18 numbers
-L_SCALE = 1e-6     
-V_SCALE = L_SCALE**3
-A_SCALE = L_SCALE**2
+# Scaling
+L_S = 1e-6
+V_S = L_S**3
+A_S = L_S**2
 
-# ==========================================
-# 2. GEOMETRY FUNCTIONS (The LunaIcy Model)
-# ==========================================
+# --- 2. Geometry (LunaIcy) ---
 
 def get_rp(rg, rb):
-    """Calculates pore/fillet radius based on user formula."""
-    # rg, rb in MICRONS
+    # rb, rg in MICRONS
     if rg <= rb: return 1e-9
     # Formula: rp = rb^2 / (2*(rg - rb))
-    return (rb**2) / (2 * (rg - rb))
+    val = (rb**2) / (2 * (rg - rb))
+    return max(1e-12, val) # Clamp to avoid div/0
 
-def get_geometry_scaled(vars_micron):
+def get_geometry_log(params):
     """
-    Computes Volumes (m^3), Areas (m^2), and rp (m) 
-    Input: [rg, rb] in MICRONS
+    Input: [ln(rg), ln(rb)]
+    Output: Vg, Vb, Sg, Sb, rp, Kg, Kb (SI UNITS)
     """
-    rg_um, rb_um = vars_micron
+    rg_um = np.exp(params[0])
+    rb_um = np.exp(params[1])
     
-    # 1. Geometric Safety & Constraints
-    if rb_um <= 1e-9: rb_um = 1e-4 # Avoid div by zero
+    # Geometric Constraints for stability
     if rb_um >= rg_um * 0.99: rb_um = rg_um * 0.99
     
     rp_um = get_rp(rg_um, rb_um)
     
-    # 2. Find Intersection x* (height where grain meets bond)
-    # Using the rigorous geometric definition: 
-    # Height_Grain(x*) = Height_Bond(x*)
+    # x* Intersection
     def h_diff(x):
-        # Height of Grain sphere
         hg = np.sqrt(max(0, rg_um**2 - x**2))
-        # Height of Bond torus/fillet
-        # The fillet is a circle of radius rp centered at (rg, rb+rp)
-        # Equation: (x - rg)^2 + (y - (rb+rp))^2 = rp^2
-        # y = (rb+rp) - sqrt(rp^2 - (rg-x)^2)
         hb = (rb_um + rp_um) - np.sqrt(max(0, rp_um**2 - (rg_um - x)**2))
         return hg - hb
-
-    # Bracket search for x* between 0 and rg
+    
+    # Approx x* is usually sufficient and more stable for derivatives
+    # But we try precise root finding
     try:
-        # Standard brentq is fast and robust
         from scipy.optimize import brentq
         x_star_um = brentq(h_diff, 0, rg_um * 0.9999)
     except:
-        # Fallback if geometry is degenerate (very rare)
-        x_star_um = rg_um * 0.9 
+        x_star_um = rg_um * 0.9
 
-    # 3. Surface Areas (Integrals)
-    # S_g: Grain Area
-    def integrand_Sg(theta):
+    # Sg (Grain Area)
+    def int_Sg(theta):
         val = 1 - (x_star_um / (rg_um * np.cos(theta)))**2
         return np.sqrt(max(0, val))
     
     limit = np.arccos(min(1.0, x_star_um/rg_um))
-    val_Sg, _ = quad(integrand_Sg, 0, limit)
-    # Multiplied by 4 per user note/symmetry
+    val_Sg, _ = quad(int_Sg, 0, limit)
     Sg_um2 = 4 * (rg_um**2 * (np.pi - 2 * val_Sg))
     
-    # S_b: Bond Area (Explicit formula)
+    # Sb (Bond Area)
     L_um = rg_um - x_star_um
     term_asin = np.arcsin(min(1.0, L_um/rp_um))
     Sb_um2 = 2 * np.pi * rp_um * ((rb_um + rp_um)*term_asin - L_um)
     
-    # 4. Volumes (Integrals)
-    # V_g: Grain Volume
-    def A_func(r): 
-        # The inner integral A(x*, r) from the notes
+    # Vg (Grain Volume)
+    def A_func(r):
         if r < x_star_um: return 0
         up = np.arccos(min(1.0, x_star_um/r))
         def sub(th): return np.sqrt(max(0, 1-(x_star_um/(r*np.cos(th)))**2))
@@ -104,146 +85,131 @@ def get_geometry_scaled(vars_micron):
     V_inner = (np.pi * x_star_um**3)/3.0
     Vg_um3 = 4 * (V_inner + V_outer)
     
-    # V_b: Bond Volume (Explicit formula)
+    # Vb (Bond Volume)
     t1 = np.pi * (rb_um + rp_um)**2 * L_um
-    sq_term = np.sqrt(max(0, rp_um**2 - L_um**2))
-    t2 = 2*(rb_um + rp_um)*np.pi*((L_um/2)*sq_term + (rp_um**2/2)*term_asin)
+    t2 = 2*(rb_um + rp_um)*np.pi*((L_um/2)*np.sqrt(max(0, rp_um**2 - L_um**2)) + (rp_um**2/2)*term_asin)
     t3 = np.pi * rp_um**2 * L_um
     t4 = (np.pi/3) * L_um**3
     Vb_um3 = t1 - t2 + t3 - t4
     
-    # 5. Return in SI Units (Meters)
-    return (Vg_um3 * V_SCALE, Vb_um3 * V_SCALE, 
-            Sg_um2 * A_SCALE, Sb_um2 * A_SCALE, 
-            rp_um * L_SCALE)
+    # Curvatures (SI Units)
+    Kg = 2.0 / (rg_um * L_S)
+    Kb = -1.0 / (rp_um * L_S) # Concave
 
-# ==========================================
-# 3. SIMULATION LOOP (Method of Lines)
-# ==========================================
+    return (Vg_um3 * V_S, Vb_um3 * V_S, 
+            Sg_um2 * A_S, Sb_um2 * A_S, 
+            rp_um * L_S, Kg, Kb)
+
+# --- 3. Implicit Solver (Log-Space) ---
+
+def solve_step(log_r_prev, m_prev, dt):
+    """
+    Solves for log(r_next) using Implicit Euler.
+    """
+    mg_old, mb_old = m_prev
+    
+    P_sat = P0 * np.exp(-Q_sub / (R * T))
+    Kelvin_C = (gamma * M) / (R * T * rho0)
+    Flux_C = alpha * np.sqrt(M / (2 * np.pi * R * T))
+    
+    def residual(log_r):
+        # Decode geometry
+        if log_r[1] >= log_r[0]: return [1e5, 1e5] # Constraint: rb < rg
+        
+        Vg, Vb, Sg, Sb, rp, Kg, Kb = get_geometry_log(log_r)
+        
+        # 1. Physics (Exponential Form)
+        P_Kg = P_sat * np.exp(Kelvin_C * Kg)
+        P_Kb = P_sat * np.exp(Kelvin_C * Kb)
+        
+        # 2. Flux Balance (User's m_gas derivation simplified)
+        # P_gas = Weighted Average
+        P_gas = (P_Kg * Sg + P_Kb * Sb) / (Sg + Sb)
+        
+        # 3. Fluxes
+        J_g = Flux_C * (P_Kg - P_gas)
+        J_b = Flux_C * (P_Kb - P_gas)
+        
+        # 4. Mass Balance (Implicit)
+        # m_new - m_old - dt*(-J*S) = 0
+        res_g = (Vg * rho0) - (mg_old - J_g * Sg * dt)
+        res_b = (Vb * rho0) - (mb_old - J_b * Sb * dt)
+        
+        # Normalize residuals by mass to keep solver in range ~1.0
+        return [res_g / mg_old, res_b / mb_old]
+
+    # Use 'lm' (Levenberg-Marquardt) as it's robust for stiff/scaling issues
+    sol = root(residual, log_r_prev, method='lm', tol=1e-6)
+    return sol.x if sol.success else None
+
+# --- 4. Main Loop ---
 
 def run_simulation(r0_meters):
-    # --- Initialization ---
-    rg_um = r0_meters / L_SCALE
-    rb_um = rg_um * 0.15 # Start with a small 15% neck
+    rg_um = r0_meters / L_S
+    rb_um = rg_um * 0.1 # Start at 5% to avoid Angstrom-scale singularity
     
-    # Physics constants pre-calculation
-    P_sat = P0 * np.exp(-Q_sub / (R * T))
-    Kelvin_Base = (gamma * M) / (R * T * rho0)
-    Flux_Prefactor = alpha * np.sqrt(M / (2 * np.pi * R * T))
-    
-    # Time Stepping Strategy
-    # Large grains sinter strictly slower. We adapt dt and t_max based on size.
-    if r0_meters < 5e-6:      # < 5 micron
-        dt = 0.5; t_max = 5000
-    elif r0_meters < 50e-6:   # < 50 micron
-        dt = 50.0; t_max = 500000 
-    else:                     # Large grains
-        dt = 500.0; t_max = 5e6 
+    # Start with TINY time steps
+    dt = 1e-4 
+    t_max = 2e6 if r0_meters > 50e-6 else 2e4
         
     t_vals = []
     ratio_vals = []
     current_time = 0
     
-    # Initial Mass
-    Vg, Vb, Sg, Sb, rp = get_geometry_scaled([rg_um, rb_um])
+    # Initial State
+    log_r = [np.log(rg_um), np.log(rb_um)]
+    Vg, Vb, _, _, _, _, _ = get_geometry_log(log_r)
     m_g = Vg * rho0
     m_b = Vb * rho0
     
-    print(f"Simulating r0={rg_um}um | T={T:.1f}K | P_sat={P_sat:.2e} Pa")
+    next_record = dt
 
     while current_time < t_max:
-        # --- A. Physics Update ---
         
-        # 1. Curvatures
-        Kg = 2.0 / (rg_um * L_SCALE)
-        Kb = -1.0 / rp  # Concave neck (Negative Curvature)
+        new_log_r = solve_step(log_r, [m_g, m_b], dt)
         
-        # 2. Surface Pressures (EXPONENTIAL FORM)
-        # Using exp ensures P > 0 and prevents the "inverted" artifact
-        P_Kg = P_sat * np.exp(Kelvin_Base * Kg)
-        P_Kb = P_sat * np.exp(Kelvin_Base * Kb)
-        
-        # 3. Equilibrium Gas Pressure
-        # Derived from dm_gas/dt = 0 => Sum(Flux*Area) = 0
-        # P_gas = (P_Kg*Sg + P_Kb*Sb) / (Sg + Sb)
-        P_gas = (P_Kg * Sg + P_Kb * Sb) / (Sg + Sb)
-        
-        # (Optional) Recover m_gas for the record, though not used for flux
-        m_gas = (P_gas * M * Vg * phi) / ((1 - phi) * R * T)
-        
-        # 4. Fluxes (Hertz-Knudsen)
-        J_g = Flux_Prefactor * (P_Kg - P_gas) # > 0 (Sublimation)
-        J_b = Flux_Prefactor * (P_Kb - P_gas) # < 0 (Deposition)
-        
-        # --- B. Mass Update (Explicit Euler) ---
-        dm_g = -J_g * Sg * dt
-        dm_b = -J_b * Sb * dt
-        
-        m_g += dm_g
-        m_b += dm_b
-        
-        # --- C. Inverse Geometry Problem ---
-        # We need to find [rg, rb] that match the new masses m_g, m_b
-        target_Vg = m_g / rho0
-        target_Vb = m_b / rho0
-        
-        def residuals(x):
-            # x is [rg, rb] in microns
-            # Penalize unphysical geometries to guide solver
-            if x[1] >= x[0] or x[1] <= 1e-5: return [1e5, 1e5]
+        if new_log_r is None:
+            # If implicit solve fails, try cutting dt
+            dt *= 0.1
+            print(f"Solver failed at t={current_time}, reducing dt to {dt}")
+            if dt < 1e-9: break
+            continue
             
-            v_g_new, v_b_new, _, _, _ = get_geometry_scaled(x)
-            
-            # Normalized Error (Fractional)
-            # (Calculated - Target) / Target
-            err_g = (v_g_new - target_Vg) / target_Vg
-            err_b = (v_b_new - target_Vb) / target_Vb
-            return [err_g, err_b]
+        log_r = new_log_r
         
-        # 'hybr' is robust for systems of non-linear equations
-        sol = root(residuals, [rg_um, rb_um], method='hybr', tol=1e-4)
+        # Update Masses
+        Vg, Vb, _, _, _, _, _ = get_geometry_log(log_r)
+        m_g = Vg * rho0
+        m_b = Vb * rho0
         
-        if sol.success:
-            rg_um, rb_um = sol.x
-        else:
-            # If solver fails, simulation likely reached geometric limit
-            break
-            
-        # Record Data
         current_time += dt
-        t_vals.append(current_time)
-        ratio_vals.append(rb_um / rg_um)
         
-        # Stop condition (coalescence)
-        if rb_um / rg_um > 0.65: break 
+        # Recording & Adaptive dt
+        if current_time >= next_record:
+            t_vals.append(current_time)
+            ratio_vals.append(np.exp(log_r[1]) / np.exp(log_r[0]))
+            
+            next_record = current_time * 1.1 
+            dt *= 1.1 # Safe to grow dt once we pass the initial snap
+            
+        if np.exp(log_r[1])/np.exp(log_r[0]) > 0.5: break
         
     return t_vals, ratio_vals
 
-# ==========================================
-# 4. PLOTTING (Replicating Figure 3)
-# ==========================================
+# --- 5. Plot ---
 plt.figure(figsize=(10, 7))
 
-# Simulate the three sizes mentioned in typical sintering papers
-grain_sizes = [1e-6] 
-colors = ['blue', 'orange', 'green']
+sizes = [10e-6]
+cols = ['#1f77b4', '#ff7f0e', '#2ca02c']
 
-for r0, col in zip(grain_sizes, colors):
-    t_data, r_data = run_simulation(r0)
-    
-    # Plot
-    label_str = f'$r_g = {r0*1e6:.0f} \mu m$'
-    plt.loglog(t_data, r_data, label=label_str, color=col, linewidth=2)
+for r0, c in zip(sizes, cols):
+    print(f"Simulating r0={r0}...")
+    t, r = run_simulation(r0)
+    plt.loglog(t, r, label=f'$r_g = {r0*1e6:.0f} \\mu m$', color=c, lw=2)
 
-plt.xlabel('Time (s)', fontsize=12)
-plt.ylabel('Neck Ratio $x = r_b / r_g$', fontsize=12)
-plt.title(f'Sintering of Europa Ice (LunaIcy Simulation)\nT = {T_celsius} °C, $\\alpha$ = {alpha}', fontsize=14)
-plt.grid(True, which="both", ls="-", alpha=0.4)
-plt.legend(fontsize=12)
-
-# Optional: Add slope guide for visual verification of power law
-# Sintering usually follows x ~ t^(1/n). A slope of 1/5 or 1/6 is common for vapor transport.
-# plt.loglog([10, 1000], [0.3, 0.3 * (1000/10)**(1/5)], 'k--', label='Slope ~ 1/5')
-
-plt.tight_layout()
+plt.xlabel('Time (s)')
+plt.ylabel('Neck Ratio $x = r_b / r_g$')
+plt.title(f'Sintering of Europa Ice (Implicit Log-Solver)\nT = {T_celsius} °C, $\phi={phi}$')
+plt.grid(True, which="both", alpha=0.3)
+plt.legend()
 plt.show()
