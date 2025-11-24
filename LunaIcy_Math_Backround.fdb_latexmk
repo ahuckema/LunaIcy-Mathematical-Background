@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex LunaIcy_Math_Backround"] 1764002147.48348 "LunaIcy_Math_Backround.aux" "LunaIcy_Math_Backround.bbl" "LunaIcy_Math_Backround" 1764002149.51801 0
+["bibtex LunaIcy_Math_Backround"] 1764005140.14684 "LunaIcy_Math_Backround.aux" "LunaIcy_Math_Backround.bbl" "LunaIcy_Math_Backround" 1764005142.21527 0
   "./References.bib" 1763980242.67875 566 a807262716f93fb90b2dc8819b3d044b ""
   "/usr/local/texlive/2025/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "LunaIcy_Math_Backround.aux" 1764002149.22733 4219 51e2a7f5ae4a60f9d9bedf67a666d368 "pdflatex"
+  "LunaIcy_Math_Backround.aux" 1764005141.92674 5038 ab475d7a46f15f7d5b33535449cbb182 "pdflatex"
   (generated)
   "LunaIcy_Math_Backround.bbl"
   "LunaIcy_Math_Backround.blg"
   (rewritten before read)
-["pdflatex"] 1764002147.57662 "/Users/arne/Desktop/Uni Mannheim/Esa_Bewerbung/LunaIcy-Mathematical-Background/LunaIcy_Math_Backround.tex" "LunaIcy_Math_Backround.pdf" "LunaIcy_Math_Backround" 1764002149.51814 0
-  "/Users/arne/Desktop/Uni Mannheim/Esa_Bewerbung/LunaIcy-Mathematical-Background/LunaIcy_Math_Backround.tex" 1764002145.19886 30890 d5f598319a091634103bad97884ba7f6 ""
+["pdflatex"] 1764005140.24093 "/Users/arne/Desktop/Uni Mannheim/Esa_Bewerbung/LunaIcy-Mathematical-Background/LunaIcy_Math_Backround.tex" "LunaIcy_Math_Backround.pdf" "LunaIcy_Math_Backround" 1764005142.2154 0
+  "/Users/arne/Desktop/Uni Mannheim/Esa_Bewerbung/LunaIcy-Mathematical-Background/LunaIcy_Math_Backround.tex" 1764005137.83671 31314 bc05881f13461fddcb25c333a622e153 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -280,13 +280,14 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1757064974 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1741450574 3345740 46b66fdb0378f7bf5921b5eabf1762b8 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "LunaIcy_Math_Backround.aux" 1764002149.22733 4219 51e2a7f5ae4a60f9d9bedf67a666d368 "pdflatex"
-  "LunaIcy_Math_Backround.bbl" 1764002147.57313 255 a6cb16dc1fa7944c363d4d91a8aa6c22 "bibtex LunaIcy_Math_Backround"
-  "LunaIcy_Math_Backround.out" 1764002149.22824 2241 2015e5f1557d5271af1a28a0d1962883 "pdflatex"
-  "LunaIcy_Math_Backround.tex" 1764002145.19886 30890 d5f598319a091634103bad97884ba7f6 ""
-  "LunaIcy_Math_Backround.toc" 1764002149.22844 1242 4f721688347c8ad9c28cdfeb150b48e2 "pdflatex"
+  "LunaIcy_Math_Backround.aux" 1764005141.92674 5038 ab475d7a46f15f7d5b33535449cbb182 "pdflatex"
+  "LunaIcy_Math_Backround.bbl" 1764005140.23745 255 a6cb16dc1fa7944c363d4d91a8aa6c22 "bibtex LunaIcy_Math_Backround"
+  "LunaIcy_Math_Backround.out" 1764005141.92762 2241 04833286c08da40950dde64b7bd65c29 "pdflatex"
+  "LunaIcy_Math_Backround.tex" 1764005137.83671 31314 bc05881f13461fddcb25c333a622e153 ""
+  "LunaIcy_Math_Backround.toc" 1764005141.92784 1242 e03b29baad3c73f00be7451f2f49dd16 "pdflatex"
   "Pictures/Geometry.png" 1763907039.55891 317762 feac319e4668ce1ec8ffaa2ecc844fff ""
   "Pictures/MiniExampleResults.png" 1763980650.47666 900682 a0977f37dad11cb777f3405ee10fd079 ""
+  "Pictures/ResultFromDynamicSintering.jpg" 1764005103.35655 131317 a83dd3ddb3cb8845316c5aa3ea64421e ""
   "amd.sty" 1763979628.33851 7653 6b1d15df38562f106193b0577625e62f ""
   "theorems.tex" 1762792795.67226 5790 b93c65a1e320981b6114d31a9df3ae43 ""
   (generated)
