@@ -5,6 +5,10 @@
 % %         General Setting
 % %--------------------------------------------------------------------------
 
+\usepackage{float}
+\usepackage{graphicx}
+\graphicspath{{Images/}}
+
 \graphicspath{{Images/}{../Images/}} %Path of figures
 \setkeys{Gin}{width=0.85\textwidth} %Size of figures
 \setlength{\cftbeforechapskip}{3pt} %space between items in toc
@@ -38,67 +42,89 @@
 \begin{document}
 
 
+\begin{center}
+    {\huge LunaIcy Mathematical Derivation and Implementation}
+\end{center}
+\begingroup
+    \let\clearpage\relax
+    \tableofcontents
+\endgroup
 
 
+\section{Introduction}
+\begin{center}
+    % Define the subspace: 80% of text width
+    \begin{minipage}{0.8\textwidth}
+        \vspace{0.3cm} 
+        
+        % Center the title strictly within this subspace
+        {\centering \textbf{Abstract} \par}
+        
+        \vspace{0.2cm}
+        \small 
+        \noindent % Suppress indentation for the block look
+        In light of the upcoming missions planned to Jupiters moon Europa such as JUICE and even mission that will attempt to drill through the ice sheet, the geometry of the ice grains are of great interest in order to succefully navigate such a mission! Further, in order to study micro meteorite impacts, the analysis of the surface of impact is clearly of vital importance! This little report explains the Paper \cite{https://doi.org/10.48550/arxiv.2410.15844}. There it was proposed that the low thermal inertia of the porous ice can gives way for us to presume that the depth of significant tenperature changes before dissipating is very low (only a few centimeters). Thus in the following study of the ice sheets microstructure changes due to sintering can be limited to only a small gird. Further, at the bottom for the to be defined heat equation we can use Neumann boundary data that ensures that the temperature change has vanished, when reaching the bottom.
+        
+        \vspace{0.3cm} 
+    \end{minipage}
+\end{center}
 
 
-
-
-\chapter*{LunaIcy numerics of ODEs and PDEs}
-\section{Mathematical Derivation of the Main Problem}
-In light of the upcoming missions planned to Jupiters moon Europa such as JUICE and even mission that will attempt to drill through the ice sheet, the geometry of the ice grains are of great interest in order to succefully navigate such a mission! This little report explains the Paper ???. There it was proposed that the low thermal inertia of the porous ice can gives way for us to presume that the depth of significant tenperature changes before dissipating is very low (only a few centimeters). Thus in the following study of the ice sheets microstructure changes due to sintering can be limited to only a small gird. Further, at the bottom for the to be defined heat equation we can use Neumann boundary data that ensures that the temperature change has vanished, when reaching the bottom.\\
+\newpage
 Consider a one dimensional slice of the Ice sheet of Jupiters moon Europa. This is our state space $\Omega := [0,d] \subset \mathbb{R}$ where $d$ denotes the depth od the ice sheet. This model attempts to model the changing ice grains and their bonds to their neighboring grains such that a steady state (fixed point of the dynamic system) is reached that aims to explain the ice grain and bond size in the ice sheet of Europa.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{Pictures/Geometry.png}
-  \caption{}
-  \label{}
+  \caption{Illustration of the Grain and Bond geometry \cite{https://doi.org/10.48550/arxiv.2410.15844}. In this report I denoted $M_g$ and $M_b$ as $S_g$ and $S_b$ respectively. It describes the surface area of the grain and bond.}
+  \label{Fig: Geometry}
 \end{figure}
-In every state in $\Omega$ we denote the microstructure $y(x,t) := (r_g (x,t) , r_b (x,t))^T$, where $r_g$ is the grain radius and $r_b$ is the bond radius is modelled by the system of ODEs for every $x \in \Omega$ as 
-\begin{equation}
-\label{ODE}
-\frac{d}{dt} y(x,t) = f(y(x,t), T(x,t)), t>0,\quad y(x,0) = y_0 (x).
-\end{equation}
-This change of radii is modeled indirectly via the water vapor transport. Consider the conservation law 
+Choose some discretization of the state space $\Omega_h \subset \Omega$ where $|\Omega_h|$ is the number of grid points that slice. Note that every grid points is made up of a lot of ice crystals. The one we model via grid point is supposed to be a average representation of these crystals. Then in every state in $x \in \Omega_h$ we denote the microstructure $(r_g (x,t) , r_b (x,t))^T$, where $r_g$ is the grain radius and $r_b$ is the bond radius. This change of radii/microstructure is modeled indirectly via the water vapor transport. Consider the conservation law (i.e. we have a closed system where we do not loose or gain mass) 
 \[
-\frac{d}{dt} (m_g (t) + m_b (t) + m_{gas}(t))=0
+\frac{\partial}{\partial t} (m_g (x,t) + m_b (x,t) + m_{gas}(x,t)) =0, \quad x \in \Omega_h, t \geq 0,
 \]
-where $m_g$ is the mass of the grain, $m_b$ mass of the bonds between two grains (we assume two bonds for each grain) and $m_{gas}$ the mass of the surrounding gas vapor mass in the pores. I.e. we have a closed system where we do not loose mass. A benifit of this approach is that we do not make assumptions on the underlying intial water vapor pressure, but only on its initial mass. Using the the Hertz-Knudsen formula transport only occurs proportionally to the difference in gas pressure in the pore space and the saturated water vapor pressure over a flat surface we get the ODE
+where $m_g$ is the mass of the grain, $m_b$ mass of the bonds between two grains (we assume two bonds for each grain) and $m_{gas}$ the mass of the surrounding gas vapor mass in the pores.
+A benifit of the approach of modelling the masses is that we do not make assumptions on the underlying intial water vapor pressure, but only on its initial mass. Further, we assume that this conservation law only holds locally for every $x \in \Omega_h$ and not globally.Using the the Hertz-Knudsen formula transport only occurs proportionally to the difference in gas pressure in the pore space and the saturated water vapor pressure over a flat surface we get for every $x \in \Omega_h$ the ODE
+\begin{align*}
+&\frac{\partial}{\partial t} m_{gas} (x,t) \\
+&= J_g  \left( t,T(x,t), r_g(x,t), m_{gas}(x,t) \right)  S_g (t, r_g(x,t))  +
+    J_b (t,T(x,t), r_b(x,t), m_{gas}(x,t) ) S_b (t, r_g(x,t),r_b (x,t)) \\
+    &=: J_g S_g + J_b S_b,
+\end{align*}
+which is an asymptotic stable linear ODE (in section 2.1 it can be seen that the flux $J_i$ is linear in $m_{gas}$ and has negative derivative). Here $S_{g} (t)$ denotes the area of the grain with the outward gas and $J_{g}$ is the repective flux, $ S_{b}(t)$ the area of the bond with the gas. Only if these fluxes are non zero sublimation will occur! We assume that this fixed point is reached instantanuously, i.e. we assume $J_{g}(t) S_{g}(t) + J_{b} (t) S_{b}(t)=0= \frac{\partial}{\partial t} m_{gas}(x,t)$. Then grain/bond gains/losses of mass is described according to 
 \[
-\frac{d}{dt} m_{gas} (t) = J_{v,g}(t) S_{v,g}(t) + J_{v,b} (t) S_{v,b}(t)
-\]
-which is an asymptotic stable linear ODE. Here $S_{v,g} (t)$ denotes the area of the grain with the outward gas and $J_{v,g}$ is the repective flux, $ S_{v,b}(t)$ the area of the bond with the gas, $S_{g,b}$ and $S_{b,g}$ the area of the grain with the bond. Only if these fluxes are non zero sublimation will occur!\\
-We assume that this global fixed point is reached instantanuously, i.e. we assume $J_{v,g}(t) S_{v,g}(t) + J_{v,b} (t) S_{v,b}(t)=0= \frac{d}{dt} m_{gas}(t)$. Then grain/bond gains/losses of mass is described according to 
-\[
-\frac{d}{dt} m_{i} (t) = - J_{v,i}(t) S_{v,i}(t), \quad i=g,b.
+\frac{\partial}{\partial t} m_{i} (x,t) = - J_{i} S_{i}, \quad i=g,b.
 \] 
 After having updated the masses of the grain and the bonds we update their volumes 
 \[
 V_g (t+ \tau ) = \frac{m_g(t+ \tau)}{\rho_0}, \quad V_b (t+ \tau) = \frac{m_b(t+ \tau)}{\rho_0} ,
 \]
 and then retrive their respective radii via 
-\[
+\begin{equation}
+\label{Eq: f}
 \begin{pmatrix}
-    r_g (t+\tau) \\ 
-    r_b (t+\tau)
-\end{pmatrix} = f(r_g,r_b):= \arg \min_{r_g,r_b} \begin{pmatrix}
-    |V_g (t+ \tau) - v_g (r_g,r_b)| \\ 
-    |V_b (t+ \tau) - v_b (r_g,r_b)|
+    r_g (x,t+\tau) \\ 
+    r_b (x,t+\tau)
+\end{pmatrix} = f(m_g(x,t+\tau),m_b(x,t+\tau)):= \arg \min_{r_g,r_b} \begin{pmatrix}
+    |\frac{m_g(x,t+ \tau)}{\rho_0} - v_g (r_g,r_b)| \\ 
+    |\frac{m_b(x,t+ \tau)}{\rho_0}  - v_b (r_g,r_b)|
 \end{pmatrix} 
-\]
-This is the dynamics for each microstructure in a specific state $x \in \Omega$. This is now coupled with a heat equation on the same state space. The average temperature at $x \in \Omega$ is modelled via the heat eqaution with Neuman boundary data
+\end{equation}
+As seen in Figure \ref{Fig: Geometry} the point (actually circle) $\hat{x^*}$ denotes the point/area where the two surface areas of the grain and bond intersect. Thus, while optimizing for $r_g$ and $r_g$ the above function, one needs to calculate $\hat{x}^*$ for every radii that is suggested by the minimization problem. This is briefly touched upon in Section 5.1. \\
+This is the dynamics for each microstructure in a specific state $x \in \Omega$, i.e. we have a system of $|\Omega_h|$ many ODEs. As seen in the definitions of the fluxes, they also depend on the local temperature $T(x,t)$, i.e. the temperature of state $x \in \Omega_h$ at time $t\geq 0$. This means this system is now coupled with a heat equation on the same state space. The average temperature at $x \in \Omega$ is modelled via the heat eqaution with Neuman boundary data
 \begin{align}
     \label{PDE}
-&\rho (x,t) c_p (x,t) \frac{\partial}{\partial t} T(x,t) = \frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t), \quad x \in \Omega, t>0 \\
+\rho c_p \frac{\partial}{\partial t} T(x,t) &= \frac{\partial}{\partial x} k(f(m_g(x,t),m_b (x,t))) \frac{\partial}{\partial x} T(x,t), \quad x \in \Omega, t>0 \\
 \label{Neumann}
-&k(0,t) \frac{\partial}{\partial x}  T(0,t) = - F_{solar} (t) + \epsilon \sigma_{SB} T(0,t)^4 \text{ and } k(d,t) \frac{\partial}{\partial x}  T(d,t) =0 , \quad t >0 \\
-&T(x,0) = T_0 (x), x \in \Omega,
+k(f(m_g(0,t),m_b (0,t)))\frac{\partial}{\partial x}  T(0,t) &= - F_{solar} (t) + \epsilon \sigma_{SB} T(0,t)^4 \\
+k(f(m_g(d,t),m_b (d,t))) \frac{\partial}{\partial x}  T(d,t) &=0 , t >0 \\
+T(x,0) &= T_0 (x), x \in \Omega,
 \end{align}
-where $\rho,c_p$ and $k$ are model specific functions that depend on $y(x,t)$, coupling the ODE to the PDE. $F_{solar}$ is the energy that comes from the sun and $\sigma_{SB}$ and $\epsilon$ are model specific constants.\\
-Thus, in order to model the changing microstructure that depends on the temperature, in each step we first solve for the equilibrium gas mass $m_{gas}(t)$, then update the masses for the grain and the bond by solving the ODE in each state, recover the new radii and fianlly solve the heat equation via the method of lines.
+where $\rho,c_p \in \mathbb{R}$ are constants and $k$ denotes the thermal conductivity that couples the ODE to the PDE. For ease of notation we will write $k(x,t) :=k(f(m_g(x,t),m_b (x,t)))$. Lastly, $F_{solar}$ is the energy that comes from the sun and $\sigma_{SB}$ and $\epsilon$ are model specific constants.\\
+Thus, in order to model the changing microstructure that depends on the temperature, in each step we first solve for the equilibrium gas mass $m_{gas}(x,t)$ at each state, then update the masses for the grain and the bond by solving the ODE in each state, recover the new radii and fianlly solve the heat equation via the method of lines.
 
 
 \section{Physics behind the model}
+Here we will go in more detail behind the Physics of these equation giving them a little overview.
 \subsection{Physics behind the ODE}
 We denote by $P_{gas} (t) $ the pressure of the surrounding gas/water vapor at time $t$. $P_{K_j} (t)$ denotes the the equilibrium vapor pressure of a curved surface $j$ with average curvature $K_j$. Note that a result in ??? is that 
 \[
@@ -114,7 +140,7 @@ P_{K_j } (t) := P_{sat} (T(x,t)) \left( 1+ \frac{\gamma M}{R T(x,t) \rho_0} K_j 
 \] 
 where $\gamma,\rho_0 \in \mathbb{R}$ are constant, where $\gamma$ is the water surface tension and $\rho_0$ the bulk ice density. $P_{sat}(T(x,t))= P_0 e^{-\frac{Q_{sub}}{RT(x,t)}}$ is the saturated water pressure of a flat surface. Here $P_0,Q_{sub} \in \mathbb{R}$ are constants, where $P_0$ is called high temperature pressure limit, as theoreticall the temperature goes to infinity this saturated water pressure of a flat surface will be equal to $P_0 \cdot 1$. $Q_{sub}$ is the activation energy for sublimation.  Further, 
 \[
-P_{gas} (T(x,t)) := \frac{m_g (t) R T(x,t)}{M V_{pore}} =\frac{(1-\phi) m_{gas} (t) R T(x,t)}{M V_g \phi}, \quad  V_{pore} := V_g \frac{\phi}{1-\phi} ,
+P_{gas} (T(x,t)) := \frac{m_{gas} (t) R T(x,t)}{M V_{pore}} =\frac{(1-\phi) m_{gas} (t) R T(x,t)}{M V_g \phi}, \quad  V_{pore} := V_g \frac{\phi}{1-\phi} ,
 \]
 where $V_g$ denotes the volume of the grain, $m_{gas}$ the equilibrium mass of water vapor mass and $\phi$ denotes the porosity.
 \subsection{Physics behind the PDE}
@@ -138,65 +164,62 @@ k(\phi,r_b,r_g) = k_0 (T(x,t)) (1-\phi) \frac{r_b}{r_g}.
 This last term is here links the PDE to the ODE.
 
 \section{Numerical Solution of the ODE}
-\subsection{Deriving the ODE}
-In the introduction we defined an ODE over the radii of the average grain and bond of the mircostructure. This paper models the change of mass of the grain and the bond using the interactions with the adjacent water vapor and then connect that to the change of the radii. We consider the ODE 
-\[
-\frac{d}{dt} \begin{pmatrix}
-    m_g (t) \\ m_b (t)
-\end{pmatrix} = \begin{pmatrix}
-     J_{v,g} (t) S_{v,g} (t) +  J_{b,g} (t) S_{b,g} (t) \\
-     J_{v,b} (t) S_{v,b}(t) + J_{g,b} (t) S_{g,b}(t)
-\end{pmatrix}
-\]
-which stems from the Hertz-Knudsen formula. 
-
-
-
-
-
-If we plug in the formulas into the ODE of gas mass change, which is instantanuously, i.e. $\frac{d}{dt} m_{gas}(t) =0$ we get a algebraically solvable equation
+Remember the conservation law, which yielded that $\frac{d}{dt} m_{gas}(t) =0$. We can now derive a algebraically solvable equation
 \begin{align*}
-    &0=\frac{d}{dt} m_{gas} (t) = J_{v,g} (t) S_{v,g} (t)+ J_{v,b} (t) S_{v,b}(t) \\
+    &0=\frac{d}{dt} m_{gas} (t) = J_{g} (t) S_{g} (t)+ J_{b} (t) S_{b}(t) \\
     &= S_g \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left( P_s (T(x,t)) \left(1 + \frac{\gamma M}{R T(x,t) \rho_0} K_g  \right) -P_{gas}(T(x,t)) \right) \\
     &+ S_b \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left( P_s (T(x,t)) \left(1 + \frac{\gamma M}{R T(x,t) \rho_0} K_b \right)-P_{gas}(T(x,t))  \right) \\
     &= \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left( (s_g + S_b) P_s (T(x,t)) + S_g P_s (T(x,t)) \frac{\gamma M}{R T(x,t) \rho_0} K_g + S_b P_s (T(x,t)) \frac{\gamma M}{R T(x,t) \rho_0} K_b \right) \\
     &-\alpha \sqrt{\frac{M}{2 \pi R T(x,t)}}P_{gas}(T(x,t)) (S_g +S_b) \\
     &= P_s (T(x,t)) \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left(S_g +S_b +\frac{\gamma M}{R T(x,t) \rho_0} (S_g K_g+S_b K_b)  \right) -P_{gas}(T(x,t)) \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} (S_g +S_b)\\
-    &= \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left(  P_0 e^{-\frac{Q_{sub}}{R T(x,t)}}  \left(S_g +S_b +\frac{\gamma M}{R T(x,t) \rho_0} (S_g K_g+S_b K_b)  \right) -\frac{(1-\phi) m_{gas} (t)  R T(x,t)}{M V_g \phi}  (S_g +S_b) \right).
+    &= \alpha \sqrt{\frac{M}{2 \pi R T(x,t)}} \left(  P_0 e^{-\frac{Q_{sub}}{R T(x,t)}}  \left(S_g +S_b +\frac{\gamma M}{R T(x,t) \rho_0} (S_g K_g+S_b K_b)  \right) -\frac{(1-\phi) m_{gas} (t)  R T(x,t)}{M V_g \phi}  (S_g +S_b) \right),
 \end{align*}
-So we need to solve the above equation for $m_{gas}(t)$:
+which solved for $m_{gas}(t)$ is:
 \[
-m_{gas}(t) =  P_0 e^{-\frac{Q_{sub}}{R T(x,t)}}  \left(S_g +S_b +\frac{\gamma M}{R T(x,t) \rho_0} (S_g K_g+S_b K_b)  \right) \frac{M V_g \phi}{(1-\phi) R T(x,t) (S_g +S_b) }
+m_{gas}(t) =  P_0 e^{-\frac{Q_{sub}}{R T(x,t)}}  \left(S_g +S_b +\frac{\gamma M}{R T(x,t) \rho_0} (S_g K_g+S_b K_b)  \right) \frac{M V_g \phi}{(1-\phi) R T(x,t) (S_g +S_b) }.
+\]
+Finally, we need to solve for every $x \in \Omega_h$ the system of ODEs given by 
+\[
+\frac{d}{dt} \begin{pmatrix}
+    m_g (t) \\ m_b (t)
+\end{pmatrix} = \begin{pmatrix}
+    - J_g  \left( t,T(x,t), r_g(x,t), m_{gas}(x,t) \right)  S_g (t, r_g(x,t))   \\
+     - J_b (t,T(x,t), r_b(x,t), m_{gas}(x,t) ) S_b (t, r_g(x,t),r_b (x,t))
+\end{pmatrix},
+\]
+altough we solve the for the radii by 
+\[
+\begin{pmatrix}
+    r_g (x,t+\tau) \\ 
+    r_b (x,t+\tau)
+\end{pmatrix} = f(m_g(x,t+\tau),m_b(x,t+\tau)):= \arg \min_{r_g,r_b} \begin{pmatrix}
+    |\frac{m_g(x,t+ \tau)}{\rho_0} - v_g (r_g,r_b)| \\ 
+    |\frac{m_b(x,t+ \tau)}{\rho_0}  - v_b (r_g,r_b)|
+\end{pmatrix} .
+\]
+Due to the fact that can not continuously solve this last minimization problem of $f$, we need to set the step size $\tau$ smaller than the time needed to significantly change the grains/bonds volumes $\tau_{sint_v}(r_b) := \min \{ t \geq 0 \mid |V_b (t)-V_b (0)|> \delta \}$. Mathematically this just means that this system is stiff. In order to avoid dealing with this issue, we just solve it by using an implicit method, i.e. implicit Euler:
+\[
+m_i (t+ \tau) = m_i (t)- \alpha J_{i} (t+\tau) S_{i} (t+\tau)
 \]
 
 
-
-
-
-
-\subsection{Stiffness of the Problem}
-Then grain/bond gains/losses of mass is described according to 
-\[
-\frac{d}{dt} m_{i} (t) = - J_{v,i}(t) S_{v,i}(t), \quad i=g,b.
-\] 
-Note that we need assume constant grain/bond geometry in a single time step of these two ODEs. This constrains the choice of the step size $\tau$ to be smaller than the time needed to significantly change the grains/bonds volumes $\tau_{sint_v}(r_b) := \min \{ t \geq 0 \mid |V_b (t)-V_b (0)|> \delta \}$.
 
 \section{Numerical Solution of the PDE}
 To numerically solve this PDE we first discretize the state space by $\Omega_h \subset \Omega$ and thus get a system of ODEs as (\ref{ODE}) and approximating (\ref{PDE}) by the methods of lines. We integrate both sides from $[x_{i-\frac{1}{2}}, x_{i+ \frac{1}{2}}]$ and divide by the length of the intervall $h$: 
 \begin{align*}
-&\rho (x,t) c_p (x,t) \frac{\partial}{\partial t} T(x,t) = \frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) \\
-&\iff \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho (x,t) c_p (x,t) \frac{\partial}{\partial t} T(x,t) dx = \frac{1}{h} \int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) dx \\
-&\iff \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho (x,t) c_p (x,t) \frac{\partial}{\partial t} T(x,t) dx = \frac{1}{h} \left( k(x_{i+\frac{1}{2}},t) \frac{\partial}{\partial x} T(x_{i+\frac{1}{2}},t) -  k(x_{i-\frac{1}{2}},t) \frac{\partial}{\partial x} T(x_{i-\frac{1}{2}},t) \right) \\
-&\iff \frac{\partial}{\partial t} \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho (x,t) c_p (x,t)  T(x,t) dx \\
+&\rho c_p  \frac{\partial}{\partial t} T(x,t) = \frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) \\
+&\iff \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho c_p  \frac{\partial}{\partial t} T(x,t) dx = \frac{1}{h} \int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) dx \\
+&\iff \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho c_p  \frac{\partial}{\partial t} T(x,t) dx = \frac{1}{h} \left( k(x_{i+\frac{1}{2}},t) \frac{\partial}{\partial x} T(x_{i+\frac{1}{2}},t) -  k(x_{i-\frac{1}{2}},t) \frac{\partial}{\partial x} T(x_{i-\frac{1}{2}},t) \right) \\
+&\iff \frac{\partial}{\partial t} \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho  c_p   T(x,t) dx \\
 &\qquad = \frac{1}{h} \left( k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h} + \mathcal{O}(h^2) \right).
 \end{align*}
 Thus for every $x_i$ we get the approximate ODE (second order error)
 \[
-\frac{\partial}{\partial t} \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho (x,t) c_p (x,t)  T(x,t) dx \approx k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h^2} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h^2} .
+\frac{\partial}{\partial t} \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho  c_p   T(x,t) dx \approx k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h^2} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h^2} .
 \]
 We will approximate the left hand side integral by its center point (mean value theorem) and thus get the three point method 
 \[
-\frac{\partial}{\partial t} \frac{1}{h}  \rho (x_i,t) c_p (x_i,t)  T(x_i,t)  h \approx k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h^2} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h^2} .
+\frac{\partial}{\partial t} \frac{1}{h}  \rho  c_p  T(x_i,t)  h \approx k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h^2} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h^2} .
 \]
 This approximation only holds for the interior. Because we have Neumann boundary data (\ref{Neumann}) on both sides we need to introduce ghost cells. Aproximating the boundary data by symmetric differences, i.e. also second order, we get 
 \begin{align*}
@@ -216,14 +239,14 @@ Thus in total the following system of ODEs needs to be solved
 \begin{align*}
     \frac{d}{dt} \begin{pmatrix}
         y(x_0,t) \\
-         \rho (x_0,t) c_p (x_0,t)  T(x_0,t) \\
+         \rho  c_p   T(x_0,t) \\
         y(x_1,t) \\
-         \rho (x_1,t) c_p (x_1,t)  T(x_1,t) \\
+         \rho  c_p   T(x_1,t) \\
         \vdots \\
         y(x_{d-1},t) \\
-          \rho (x_{d-1},t) c_p (x_{d-1},t)  T(x_{d-1},t) \\
+          \rho  c_p  T(x_{d-1},t) \\
         y(x_{d},t) \\
-         \rho (x_d,t) c_p (x_d,t)  T(x_d,t) \\
+         \rho c_p T(x_d,t) \\
     \end{pmatrix}
     = \begin{pmatrix}
         f(y(x_0,t),T(x_0,t))\\
@@ -237,12 +260,7 @@ Thus in total the following system of ODEs needs to be solved
         k(x_{d+\frac{1}{2}},t) \frac{T(x_{d-1},t)-T(x_d,t)}{h^2} -  k(x_{d-\frac{1}{2}},t) \frac{T(x_d,t) - T(x_{d-1},t)}{h^2} \\
     \end{pmatrix}
 \end{align*}
-When considering the right hand side the product rule yields
-\[
-\frac{d}{dt} \rho (x_i,t) c_p (x_i,t)  T(x_i,t)  =  \rho (x_i,t) c_p (x_i,t) \frac{d}{dt} \left( T(x_i,t) \right)  + T(x_i,t) \frac{d}{dt} \left( \rho (x_i,t)  c_p (x_i,t)  \right).
-\]
-The second summand is neglegable due to the fact that it describes the rate at which the material properties change. One estimates the age of the Ice sheet to be 30 Million years old (R. T. Pappalardo et al. 1998). This begs the question wether Europa’s ice microstructure
-changed in a shorter time than its ice crust age? For simplifications, we answer this questions with no, for now. This simplies the system of ODEs to:
+which is equivalent to
 \[
  \frac{d}{dt} \begin{pmatrix}
         y(x_0,t) \\
@@ -257,14 +275,14 @@ changed in a shorter time than its ice crust age? For simplifications, we answer
     \end{pmatrix}
     = \begin{pmatrix}
         f(y(x_0,t),T(x_0,t))\\
-        \frac{1}{\rho (x_0,t) c_p (x_0,t)}\left( k(x_{\frac{1}{2}},t)  \frac{T(x_{1},t)-T(x_0,t)}{h^2} -  k(x_{-\frac{1}{2}},t) \frac{T(x_0,t) - T_{-1} (t) }{h^2} \right)\\
+        \frac{1}{\rho  c_p  }\left( k(x_{\frac{1}{2}},t)  \frac{T(x_{1},t)-T(x_0,t)}{h^2} -  k(x_{-\frac{1}{2}},t) \frac{T(x_0,t) - T_{-1} (t) }{h^2} \right)\\
         f(y(x_1,t),T(x_1,t))\\
-        \frac{1}{\rho (x_1,t) c_p (x_1,t) }\left( k(x_{1+\frac{1}{2}},t)  \frac{T(x_{2},t)-T(x_1,t)}{h^2} -  k(x_{1-\frac{1}{2}},t) \frac{T(x_1,t) - T(x_{0},t)}{h^2} \right)\\
+        \frac{1}{\rho  c_p  }\left( k(x_{1+\frac{1}{2}},t)  \frac{T(x_{2},t)-T(x_1,t)}{h^2} -  k(x_{1-\frac{1}{2}},t) \frac{T(x_1,t) - T(x_{0},t)}{h^2} \right)\\
         \vdots \\
         f(y(x_{d-1},t),T(x_{d-1},t))\\
-        \frac{1}{\rho (x_{d-1},t) c_p (x_{d-1},t) }\left(k(x_{d-\frac{1}{2}},t)  \frac{T(x_{d},t)-T(x_{d-1},t)}{h^2} -  k(x_{d-\frac{3}{2}},t) \frac{T(x_{d-1},t) - T(x_{d-2},t)}{h^2} \right)\\
+        \frac{1}{\rho c_p  }\left(k(x_{d-\frac{1}{2}},t)  \frac{T(x_{d},t)-T(x_{d-1},t)}{h^2} -  k(x_{d-\frac{3}{2}},t) \frac{T(x_{d-1},t) - T(x_{d-2},t)}{h^2} \right)\\
         f(y(x_{d},t),T(x_{d},t)) \\
-        \frac{1}{\rho (x_d,t) c_p (x_d,t)} \left(k(x_{d+\frac{1}{2}},t) \frac{T(x_{d-1},t)-T(x_d,t)}{h^2} -  k(x_{d-\frac{1}{2}},t) \frac{T(x_d,t) - T(x_{d-1},t)}{h^2} \right)\\
+        \frac{1}{\rho  c_p } \left(k(x_{d+\frac{1}{2}},t) \frac{T(x_{d-1},t)-T(x_d,t)}{h^2} -  k(x_{d-\frac{1}{2}},t) \frac{T(x_d,t) - T(x_{d-1},t)}{h^2} \right)\\
     \end{pmatrix}
 \]
 \section{Geometry}
@@ -391,10 +409,24 @@ S_b &= \int_0^{2 \pi} \int_0^{r_g -\hat{x}^*} r(x) \sqrt{1+ r^\prime (x)^2} dx d
 &= 2 \pi \int_0^{r_g -\hat{x}^*} r(x) \sqrt{1+ \frac{x^2}{r_p^2 -x^2 } } dx = 2 \pi r_p \left( (r_b + r_p) arcsin (\frac{r_g-\hat{x}^*}{r_p} ) - (r_g - \hat{x}^*) \right).
 \end{align*}
 The curvature of the grain is $K_g = \frac{2}{r_g}$ and of the bond $K_b = \frac{2}{r_b}$ repectively.
-
+\subsection{Finding the Intersection of Bond and Grain Area}
+In each time step the geometry updates, which means that $\hat{x}^*$ changes in every time step. It describes the point where the surface area of the bond and grain intersect. We can formulate it as the solution of the equation 
+\[
+\sqrt{r_g -x^2} = r_b +r_p - \sqrt{r_p^2 - (r_g -x)^2}, \quad x \in (0,r_g).
+\]
+This equation can be numerically solved as an root finding problem.
 
 
 
 \section{Simulations}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{Pictures/MiniExampleResults.png}
+  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results with constant temperture $-3$°C, sticking coefficient $\alpha=0.03$ and porosity $\phi=0.4$, altough the last constant was not mentioned in this particular example.}
+  \label{Fig: MiniExample}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{References}
 \end{document}

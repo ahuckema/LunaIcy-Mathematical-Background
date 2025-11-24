@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  23 NOV 2025 17:53
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  24 NOV 2025 15:39
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -865,235 +865,18 @@ Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
 \TeXr@lab=\toks62
 ) (/usr/local/texlive/2025/texmf-dist/tex/latex/tools/hhline.sty
 Package: hhline 2020/01/04 v2.04 Table rule package (DPC)
-) (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/biblatex.sty
-Package: biblatex 2024/03/21 v3.20 programmable bibliographies (PK/MW)
- (/usr/local/texlive/2025/texmf-dist/tex/latex/logreq/logreq.sty
-Package: logreq 2010/08/04 v1.0 xml request logger
-\lrq@indent=\count380
- (/usr/local/texlive/2025/texmf-dist/tex/latex/logreq/logreq.def
-File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
-))
-\c@tabx@nest=\count381
-\c@listtotal=\count382
-\c@listcount=\count383
-\c@liststart=\count384
-\c@liststop=\count385
-\c@citecount=\count386
-\c@citetotal=\count387
-\c@multicitecount=\count388
-\c@multicitetotal=\count389
-\c@instcount=\count390
-\c@maxnames=\count391
-\c@minnames=\count392
-\c@maxitems=\count393
-\c@minitems=\count394
-\c@citecounter=\count395
-\c@maxcitecounter=\count396
-\c@savedcitecounter=\count397
-\c@uniquelist=\count398
-\c@uniquename=\count399
-\c@refsection=\count400
-\c@refsegment=\count401
-\c@maxextratitle=\count402
-\c@maxextratitleyear=\count403
-\c@maxextraname=\count404
-\c@maxextradate=\count405
-\c@maxextraalpha=\count406
-\c@abbrvpenalty=\count407
-\c@highnamepenalty=\count408
-\c@lownamepenalty=\count409
-\c@maxparens=\count410
-\c@parenlevel=\count411
-\blx@tempcnta=\count412
-\blx@tempcntb=\count413
-\blx@tempcntc=\count414
-\c@blx@maxsection=\count415
-\blx@maxsegment@0=\count416
-\blx@notetype=\count417
-\blx@parenlevel@text=\count418
-\blx@parenlevel@foot=\count419
-\blx@sectionciteorder@0=\count420
-\blx@sectionciteorderinternal@0=\count421
-\blx@entrysetcounter=\count422
-\blx@biblioinstance=\count423
-\labelnumberwidth=\skip115
-\labelalphawidth=\skip116
-\biblabelsep=\skip117
-\bibitemsep=\skip118
-\bibnamesep=\skip119
-\bibinitsep=\skip120
-\bibparsep=\skip121
-\bibhang=\skip122
-\blx@bcfin=\read4
-\blx@bcfout=\write4
-\blx@langwohyphens=\language90
-\c@mincomprange=\count424
-\c@maxcomprange=\count425
-\c@mincompwidth=\count426
-Package biblatex Info: Trying to load biblatex default data model...
-Package biblatex Info: ... file 'blx-dm.def' found.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/blx-dm.def
-File: blx-dm.def 2024/03/21 v3.20 biblatex datamodel (PK/MW)
-)
-Package biblatex Info: Trying to load biblatex style data model...
-Package biblatex Info: ... file 'reading.dbx' not found.
-Package biblatex Info: Trying to load biblatex custom data model...
-Package biblatex Info: ... file 'biblatex-dm.cfg' not found.
-\c@afterword=\count427
-\c@savedafterword=\count428
-\c@annotator=\count429
-\c@savedannotator=\count430
-\c@author=\count431
-\c@savedauthor=\count432
-\c@bookauthor=\count433
-\c@savedbookauthor=\count434
-\c@commentator=\count435
-\c@savedcommentator=\count436
-\c@editor=\count437
-\c@savededitor=\count438
-\c@editora=\count439
-\c@savededitora=\count440
-\c@editorb=\count441
-\c@savededitorb=\count442
-\c@editorc=\count443
-\c@savededitorc=\count444
-\c@foreword=\count445
-\c@savedforeword=\count446
-\c@holder=\count447
-\c@savedholder=\count448
-\c@introduction=\count449
-\c@savedintroduction=\count450
-\c@namea=\count451
-\c@savednamea=\count452
-\c@nameb=\count453
-\c@savednameb=\count454
-\c@namec=\count455
-\c@savednamec=\count456
-\c@translator=\count457
-\c@savedtranslator=\count458
-\c@shortauthor=\count459
-\c@savedshortauthor=\count460
-\c@shorteditor=\count461
-\c@savedshorteditor=\count462
-\c@labelname=\count463
-\c@savedlabelname=\count464
-\c@institution=\count465
-\c@savedinstitution=\count466
-\c@lista=\count467
-\c@savedlista=\count468
-\c@listb=\count469
-\c@savedlistb=\count470
-\c@listc=\count471
-\c@savedlistc=\count472
-\c@listd=\count473
-\c@savedlistd=\count474
-\c@liste=\count475
-\c@savedliste=\count476
-\c@listf=\count477
-\c@savedlistf=\count478
-\c@location=\count479
-\c@savedlocation=\count480
-\c@organization=\count481
-\c@savedorganization=\count482
-\c@origlocation=\count483
-\c@savedoriglocation=\count484
-\c@origpublisher=\count485
-\c@savedorigpublisher=\count486
-\c@publisher=\count487
-\c@savedpublisher=\count488
-\c@language=\count489
-\c@savedlanguage=\count490
-\c@origlanguage=\count491
-\c@savedoriglanguage=\count492
-\c@pageref=\count493
-\c@savedpageref=\count494
-\shorthandwidth=\skip123
-\shortjournalwidth=\skip124
-\shortserieswidth=\skip125
-\shorttitlewidth=\skip126
-\shortauthorwidth=\skip127
-\shorteditorwidth=\skip128
-\locallabelnumberwidth=\skip129
-\locallabelalphawidth=\skip130
-\localshorthandwidth=\skip131
-\localshortjournalwidth=\skip132
-\localshortserieswidth=\skip133
-\localshorttitlewidth=\skip134
-\localshortauthorwidth=\skip135
-\localshorteditorwidth=\skip136
-Package biblatex Info: Trying to load compatibility code...
-Package biblatex Info: ... file 'blx-compat.def' found.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/blx-compat.def
-File: blx-compat.def 2024/03/21 v3.20 biblatex compatibility (PK/MW)
-)
-Package biblatex Info: Trying to load generic definitions...
-Package biblatex Info: ... file 'biblatex.def' found.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/biblatex.def
-File: biblatex.def 2024/03/21 v3.20 biblatex compatibility (PK/MW)
-\c@textcitecount=\count495
-\c@textcitetotal=\count496
-\c@textcitemaxnames=\count497
-\c@biburlbigbreakpenalty=\count498
-\c@biburlbreakpenalty=\count499
-\c@biburlnumpenalty=\count500
-\c@biburlucpenalty=\count501
-\c@biburllcpenalty=\count502
-\biburlbigskip=\muskip19
-\biburlnumskip=\muskip20
-\biburlucskip=\muskip21
-\biburllcskip=\muskip22
-\c@smartand=\count503
-)
-Package biblatex Info: Trying to load bibliography style 'reading'...
-Package biblatex Info: ... file 'reading.bbx' found.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/bbx/reading.bbx
-File: reading.bbx 2024/03/21 v3.20 biblatex bibliography style (PK/MW)
-Package biblatex Info: Trying to load bibliography style 'standard'...
-Package biblatex Info: ... file 'standard.bbx' found.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/bbx/standard.bbx
-File: standard.bbx 2024/03/21 v3.20 biblatex bibliography style (PK/MW)
-\c@bbx:relatedcount=\count504
-\c@bbx:relatedtotal=\count505
-))
-Package biblatex Info: Trying to load citation style 'authortitle'...
-Package biblatex Info: ... file 'authortitle.cbx' found.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/cbx/authortitle.cbx
-File: authortitle.cbx 2024/03/21 v3.20 biblatex citation style (PK/MW)
-Package biblatex Info: Redefining '\cite'.
-Package biblatex Info: Redefining '\parencite'.
-Package biblatex Info: Redefining '\footcite'.
-Package biblatex Info: Redefining '\footcitetext'.
-Package biblatex Info: Redefining '\smartcite'.
-Package biblatex Info: Redefining '\textcite'.
-Package biblatex Info: Redefining '\textcites'.
-)
-Package biblatex Info: Trying to load configuration file...
-Package biblatex Info: ... file 'biblatex.cfg' found.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/biblatex.cfg
-File: biblatex.cfg 
-)
-Package biblatex Info: Input encoding 'utf8' detected.
-Package biblatex Info: Document encoding is UTF8 ....
-Package biblatex Info: ... and expl3
-(biblatex)             2025-01-18 L3 programming layer (loader) 
-(biblatex)             is new enough (at least 2020/04/06),
-(biblatex)             setting 'casechanger=expl3'.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/blx-case-expl3.sty (/usr/local/texlive/2025/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
-Package: xparse 2024-08-16 L3 Experimental document command parser
-)
-Package: blx-case-expl3 2024/03/21 v3.20 expl3 case changing code for biblatex
-))) (./theorems.tex
-\c@tcb@cnt@mydefinition=\count506
-\c@tcb@cnt@myexample=\count507
-\c@tcb@cnt@myremark=\count508
+)) (./theorems.tex
+\c@tcb@cnt@mydefinition=\count380
+\c@tcb@cnt@myexample=\count381
+\c@tcb@cnt@myremark=\count382
 ) (/usr/local/texlive/2025/texmf-dist/tex/generic/babel/babel.sty
 Package: babel 2025/02/14 v25.4 The multilingual framework for pdfLaTeX, LuaLaTeX and XeLaTeX
-\babel@savecnt=\count509
+\babel@savecnt=\count383
 \U@D=\dimen318
-\l@unhyphenated=\language91
+\l@unhyphenated=\language90
  (/usr/local/texlive/2025/texmf-dist/tex/generic/babel/txtbabel.def)
-\bbl@readstream=\read5
-\bbl@dirlevel=\count510
+\bbl@readstream=\read4
+\bbl@dirlevel=\count384
  (/usr/local/texlive/2025/texmf-dist/tex/generic/babel-english/english.ldf
 Language: english 2017/06/06 v3.3r English support from the babel system
 Package babel Info: Hyphen rules for 'canadian' set to \l@english
@@ -1107,49 +890,49 @@ Package babel Info: Importing font and identification data for english
 (babel)             from babel-en.ini. Reported on input line 11.
 ) (/usr/local/texlive/2025/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty
 Package: algorithm2e 2017/07/18 v5.2 algorithms environments
-\c@AlgoLine=\count511
-\algocf@hangindent=\skip137
+\c@AlgoLine=\count385
+\algocf@hangindent=\skip115
  (/usr/local/texlive/2025/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty
 Package: ifoddpage 2022/10/18 v1.2 Conditionals for odd/even page detection
-\c@checkoddpage=\count512
+\c@checkoddpage=\count386
 ) (/usr/local/texlive/2025/texmf-dist/tex/latex/tools/xspace.sty
 Package: xspace 2014/10/28 v1.13 Space after command names (DPC,MH)
 ) (/usr/local/texlive/2025/texmf-dist/tex/latex/relsize/relsize.sty
 Package: relsize 2013/03/29 ver 4.1
 )
-\skiptotal=\skip138
-\skiplinenumber=\skip139
-\skiprule=\skip140
-\skiphlne=\skip141
-\skiptext=\skip142
-\skiplength=\skip143
-\algomargin=\skip144
-\skipalgocfslide=\skip145
+\skiptotal=\skip116
+\skiplinenumber=\skip117
+\skiprule=\skip118
+\skiphlne=\skip119
+\skiptext=\skip120
+\skiplength=\skip121
+\algomargin=\skip122
+\skipalgocfslide=\skip123
 \algowidth=\dimen319
 \inoutsize=\dimen320
 \inoutindent=\dimen321
 \interspacetitleruled=\dimen322
 \interspacealgoruled=\dimen323
 \interspacetitleboxruled=\dimen324
-\algocf@ruledwidth=\skip146
+\algocf@ruledwidth=\skip124
 \algocf@inoutbox=\box91
 \algocf@inputbox=\box92
-\AlCapSkip=\skip147
-\AlCapHSkip=\skip148
-\algoskipindent=\skip149
+\AlCapSkip=\skip125
+\AlCapHSkip=\skip126
+\algoskipindent=\skip127
 \algocf@nlbox=\box93
 \algocf@hangingbox=\box94
 \algocf@untilbox=\box95
-\algocf@skipuntil=\skip150
+\algocf@skipuntil=\skip128
 \algocf@capbox=\box96
-\algocf@lcaptionbox=\skip151
-\algoheightruledefault=\skip152
-\algoheightrule=\skip153
-\algotitleheightruledefault=\skip154
-\algotitleheightrule=\skip155
-\c@algocfline=\count513
-\c@algocfproc=\count514
-\c@algocf=\count515
+\algocf@lcaptionbox=\skip129
+\algoheightruledefault=\skip130
+\algoheightrule=\skip131
+\algotitleheightruledefault=\skip132
+\algotitleheightrule=\skip133
+\c@algocfline=\count387
+\c@algocfproc=\count388
+\c@algocf=\count389
 \algocf@algoframe=\box97
 \algocf@algobox=\box98
 )
@@ -1165,24 +948,24 @@ LaTeX Warning: Unused global option(s):
 (./LunaIcy_Math_Backround.aux)
 \openout1 = `LunaIcy_Math_Backround.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 38.
-LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -1220,16 +1003,16 @@ LaTeX Font Info:    ... okay on input line 38.
 
 (/usr/local/texlive/2025/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count516
+\scratchcounter=\count390
 \scratchdimen=\dimen325
 \scratchbox=\box99
-\nofMPsegments=\count517
-\nofMParguments=\count518
+\nofMPsegments=\count391
+\nofMParguments=\count392
 \everyMPshowfont=\toks63
-\MPscratchCnt=\count519
+\MPscratchCnt=\count393
 \MPscratchDim=\dimen326
-\MPnumerator=\count520
-\makeMPintoPDFobject=\count521
+\MPnumerator=\count394
+\makeMPintoPDFobject=\count395
 \everyMPtoPDFconversion=\toks64
 ) (/usr/local/texlive/2025/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -1237,11 +1020,11 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
  (/usr/local/texlive/2025/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-\c@lstlisting=\count522
-Package hyperref Info: Link coloring ON on input line 38.
+\c@lstlisting=\count396
+Package hyperref Info: Link coloring ON on input line 42.
  (./LunaIcy_Math_Backround.out) (./LunaIcy_Math_Backround.out)
-\@outlinefile=\write5
-\openout5 = `LunaIcy_Math_Backround.out'.
+\@outlinefile=\write4
+\openout4 = `LunaIcy_Math_Backround.out'.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
@@ -1250,56 +1033,43 @@ Package caption Info: wrapfig package is loaded.
 Package caption Info: End \AtBeginDocument code.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/ragged2e/ragged2e.sty
 Package: ragged2e 2023/06/22 v3.6 ragged2e Package
-\CenteringLeftskip=\skip156
-\RaggedLeftLeftskip=\skip157
-\RaggedRightLeftskip=\skip158
-\CenteringRightskip=\skip159
-\RaggedLeftRightskip=\skip160
-\RaggedRightRightskip=\skip161
-\CenteringParfillskip=\skip162
-\RaggedLeftParfillskip=\skip163
-\RaggedRightParfillskip=\skip164
-\JustifyingParfillskip=\skip165
-\CenteringParindent=\skip166
-\RaggedLeftParindent=\skip167
-\RaggedRightParindent=\skip168
-\JustifyingParindent=\skip169
-)
-Package biblatex Info: Trying to load language 'english'...
-Package biblatex Info: ... file 'english.lbx' found.
- (/usr/local/texlive/2025/texmf-dist/tex/latex/biblatex/lbx/english.lbx
-File: english.lbx 2024/03/21 v3.20 biblatex localization (PK/MW)
-)
-Package biblatex Info: Input encoding 'utf8' detected.
-Package biblatex Info: Automatic encoding selection.
-(biblatex)             Assuming data encoding 'utf8'.
-\openout4 = `LunaIcy_Math_Backround.bcf'.
-
-Package biblatex Info: Trying to load bibliographic data...
-Package biblatex Info: ... file 'LunaIcy_Math_Backround.bbl' not found.
-
-No file LunaIcy_Math_Backround.bbl.
-Package biblatex Info: Reference section=0 on input line 38.
-Package biblatex Info: Reference segment=0 on input line 38.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 50.
-(/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsa.fd
+\CenteringLeftskip=\skip134
+\RaggedLeftLeftskip=\skip135
+\RaggedRightLeftskip=\skip136
+\CenteringRightskip=\skip137
+\RaggedLeftRightskip=\skip138
+\RaggedRightRightskip=\skip139
+\CenteringParfillskip=\skip140
+\RaggedLeftParfillskip=\skip141
+\RaggedRightParfillskip=\skip142
+\JustifyingParfillskip=\skip143
+\CenteringParindent=\skip144
+\RaggedLeftParindent=\skip145
+\RaggedRightParindent=\skip146
+\JustifyingParindent=\skip147
+) (./LunaIcy_Math_Backround.toc
+LaTeX Font Info:    Trying to load font information for U+msa on input line 2.
+ (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 50.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 2.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-<Pictures/Geometry.png, id=99, 1263.72125pt x 650.43pt>
-File: Pictures/Geometry.png Graphic file (type png)
-<use Pictures/Geometry.png>
-Package pdftex.def Info: Pictures/Geometry.png  used on input line 53.
-(pdftex.def)             Requested size: 278.69475pt x 143.4424pt.
+))
+\tf@toc=\write5
+\openout5 = `LunaIcy_Math_Backround.toc'.
+
 
 
 [1
 
+{/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}]
+<Pictures/Geometry.png, id=139, 1263.72125pt x 650.43pt>
+File: Pictures/Geometry.png Graphic file (type png)
+<use Pictures/Geometry.png>
+Package pdftex.def Info: Pictures/Geometry.png  used on input line 77.
+(pdftex.def)             Requested size: 278.69475pt x 143.4424pt.
 
-{/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc} <./Pictures/Geometry.png>]
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1308,7 +1078,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[2]
+[2 <./Pictures/Geometry.png>]
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1327,7 +1097,8 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [4]
-Underfull \vbox (badness 1342) has occurred while \output is active []
+
+LaTeX Warning: Reference `ODE' on page 5 undefined on input line 208.
 
 
 
@@ -1339,6 +1110,9 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [5]
+Underfull \vbox (badness 1342) has occurred while \output is active []
+
+
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1357,6 +1131,9 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [7]
+Underfull \vbox (badness 2452) has occurred while \output is active []
+
+
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1383,30 +1160,59 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[10] (./LunaIcy_Math_Backround.aux)
+[10]
+<Pictures/MiniExampleResults.png, id=203, 940.51375pt x 575.14874pt>
+File: Pictures/MiniExampleResults.png Graphic file (type png)
+<use Pictures/MiniExampleResults.png>
+Package pdftex.def Info: Pictures/MiniExampleResults.png  used on input line 425.
+(pdftex.def)             Requested size: 278.69475pt x 170.43092pt.
+ (./LunaIcy_Math_Backround.bbl
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[11{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <./Pictures/MiniExampleResults.png>]
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[12
+
+])
+
+[13] (./LunaIcy_Math_Backround.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
-Package rerunfilecheck Info: File `LunaIcy_Math_Backround.out' has not changed.
-(rerunfilecheck)             Checksum: 027A915A69542ACA22C5A0D095C69457;2467.
-Package logreq Info: Writing requests to 'LunaIcy_Math_Backround.run.xml'.
-\openout1 = `LunaIcy_Math_Backround.run.xml'.
 
+
+LaTeX Warning: There were undefined references.
+
+Package rerunfilecheck Info: File `LunaIcy_Math_Backround.out' has not changed.
+(rerunfilecheck)             Checksum: 2015E5F1557D5271AF1A28A0D1962883;2241.
  ) 
 Here is how much of TeX's memory you used:
- 44557 strings out of 473190
- 891523 string characters out of 5715801
- 1888335 words of memory out of 5000000
- 67070 multiletter control sequences out of 15000+600000
- 572614 words of font info for 68 fonts, out of 8000000 for 9000
+ 37585 strings out of 473190
+ 749918 string characters out of 5715801
+ 1324479 words of memory out of 5000000
+ 60131 multiletter control sequences out of 15000+600000
+ 573720 words of font info for 70 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 101i,19n,145p,925b,1747s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm2488.pfb>
-Output written on LunaIcy_Math_Backround.pdf (10 pages, 418632 bytes).
+ 101i,19n,145p,1123b,909s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm2488.pfb>
+Output written on LunaIcy_Math_Backround.pdf (13 pages, 789220 bytes).
 PDF statistics:
- 245 PDF objects out of 1000 (max. 8388607)
- 173 compressed objects within 2 object streams
- 30 named destinations out of 1000 (max. 500000)
- 274 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 307 PDF objects out of 1000 (max. 8388607)
+ 224 compressed objects within 3 object streams
+ 36 named destinations out of 1000 (max. 500000)
+ 279 words of extra memory for PDF output out of 10000 (max. 10000000)
 
