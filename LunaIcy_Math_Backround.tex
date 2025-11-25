@@ -62,8 +62,8 @@
         
         \vspace{0.2cm}
         \small 
-        \noindent % Suppress indentation for the block look
-        In light of the upcoming missions planned to Jupiters moon Europa such as JUICE and even mission that will attempt to drill through the ice sheet, the geometry of the ice grains are of great interest in order to succefully navigate such a mission! Further, in order to study micro meteorite impacts, the analysis of the surface of impact is clearly of vital importance! This little report explains the Paper \cite{https://doi.org/10.48550/arxiv.2410.15844}. There it was proposed that the low thermal inertia of the porous ice can gives way for us to presume that the depth of significant tenperature changes before dissipating is very low (only a few centimeters). Thus in the following study of the ice sheets microstructure changes due to sintering can be limited to only a small grid. Further, at the bottom for the to be defined heat equation we can use Neumann boundary data that ensures that the temperature change has vanished, when reaching the bottom.
+        \noindent 
+        In light of the upcoming missions planned to Jupiters moon Europa such as JUICE and even mission that will attempt to drill through the ice sheet, the geometry of the ice grains are of great interest in order to succefully navigate such a mission! Further, in order to study micro meteorite impacts, the analysis of the surface of impact is clearly of vital importance! This little report explains the paper \cite{https://doi.org/10.48550/arxiv.2410.15844}. There it was proposed that the low thermal inertia of the porous ice can gives way for us to presume that the depth of significant tenperature changes before dissipating is very low (only a few centimeters). Thus in the following study of the ice sheets microstructure changes due to sintering can be limited to only a small grid. Further, at the bottom for the to be defined heat equation we can use Neumann boundary data that ensures that the temperature change has vanished, when reaching the bottom.
         
         \vspace{0.3cm} 
     \end{minipage}
@@ -438,6 +438,7 @@ This equation can be numerically solved as an root finding problem and its solut
 
 
 \section{Simulations}
+In this section the results from two different simulations will be presented. The first is a more simple one, where we assume constant temperature and only consider the sintering process for an individual ice grain and bond. It considers the development of the relative bond grain radius over time for different inital grain radii. In all cases, the original experiement by \ref{doiSinteringAdhesion} and the simulation in \cite{https://doi.org/10.48550/arxiv.2410.15844} get an objectively similar result, altough no error was explicitly calculated. The data points in the plot in that paper, also seem like they come from only one sample, which might be not enough to get a statistically relevant result. Nevertheless, the results are similar, as shown in my simulation:
 
 \begin{figure}[H]
   \centering
@@ -449,9 +450,42 @@ This equation can be numerically solved as an root finding problem and its solut
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{Pictures/ResultFromDynamicSintering}
-  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results with constant temperture $-3$°C, sticking coefficient $\alpha=0.03$ and porosity $\phi=0.4$, altough the last constant was not mentioned in this particular example.}
-  \label{Fig: MiniExample}
+  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results, altough here we let it run significantly shorter. The bond radii increase in size over time. This effect is increasingly above the Diurnal skin depth visible.}
+  \label{Fig: Sintering}
 \end{figure}
+
+
+\section{Outlook}
+Consider the full state vector 
+\[
+u(x,t) := (T(x,t), m_g (x,t),m_b (x,t), \phi (x,t),\chi (x,t))^T,
+\]
+where $\phi(x,t)$ is the porosity and $\chi (x,t)$ the density of the ice-dust mixture. Then including micro meteor impacts the full stochastic PDE system is 
+\begin{align*}
+    & dT(x,t) = \frac{1}{\rho c_p} \frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) dt + dI_{impacts}^1 (x,t) \\
+    &d m_{gb} (x,t) = F(f(m_{gb}(x,t)),T(x,t)) dt+ dI_{impacts}^2 (x,t) \\
+    &d \phi (x,t) = G(m_{gb}(x,t),\phi (x,t),T(x,t)) dt+ dI_{impacts}^3 (x,t) \\
+    &d \chi (x,t) = H(m_{gb}(x,t),\chi (x,t),T(x,t)) dt + dI_{impacts}^4 (x,t)
+\end{align*}
+where 
+\[
+dI^{i}_{impacts} (x,t):= \int_{\mathcal{E}} \mathcal{G}_i( \lim_{\epsilon \to 0} u(x,t-\epsilon) ,E) \Phi (dt,dE), \quad i=1,2,3,4,
+\]
+where $\Phi$ is a Poisson point process on $\mathbb{R}^+ \times \mathcal{E}$ with intensity measure $\lambda \times \nu$, where $\lambda$ is the Lebesgue measure and $\nu$ a suitable measure on the space of meteor characteristics $\mathcal{E}$. The function $\mathcal{G}_i$ describes the change in the state vector due to an impact of a meteor with characteristics $E \in \mathcal{E}$. This system could be solved via splitting methods, where in each time step first the deterministic PDE system is solved and then the stochastic impact part is solved. This would require to simulate the Poisson point process and then update the state vector accordingly. This is left for future research. \\
+Note that the density on the Energy space $\mathcal{E}$ is of the form 
+\[
+\nu (dE) := A_{surf} \Psi (E) dE, \quad \Psi (E) \sim const. E^{-\beta},
+\]
+The random variable 
+\[
+M_T := \sup \{ E \in \mathcal{E} \mid (t,E) \in supp (\Phi) \cap [0,T] \times \mathcal{E} \}
+\]
+then satisfies by definition of the Poission distribution
+\begin{align*}
+\mathbb{P}(M_t \leq e) &= \mathbb{P}( \Phi ([0,T] \times [e, \infty]) =0) = \exp(-\lambda (0,T) \cdot \nu ([e,\infty ])) = \exp (-T A_{surf} \int_e^\infty \Psi (E) dE) \\
+&= \exp \left( -T A_{surf} \frac{const.}{\beta -1} e^{-(\beta -1)} \right).
+\end{align*}
+which is a Frèchet distribution! Thus in order to make assumptions on worst case scenario impacts that might effect missions to Europa, extreme value statistics needs be applied!
 
 \bibliographystyle{plain}
 \bibliography{References}

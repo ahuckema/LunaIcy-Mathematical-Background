@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  24 NOV 2025 18:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  25 NOV 2025 18:40
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -945,11 +945,7 @@ Package csquotes Info: Redefining alias 'default' -> 'english'.
 LaTeX Warning: Unused global option(s):
     [A4].
 
-(./LunaIcy_Math_Backround.aux
-
-LaTeX Warning: Label `Fig: MiniExample' multiply defined.
-
-)
+(./LunaIcy_Math_Backround.aux)
 \openout1 = `LunaIcy_Math_Backround.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 42.
@@ -1068,7 +1064,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 [1
 
 {/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}]
-<Pictures/Geometry.png, id=139, 1263.72125pt x 650.43pt>
+<Pictures/Geometry.png, id=145, 1263.72125pt x 650.43pt>
 File: Pictures/Geometry.png Graphic file (type png)
 <use Pictures/Geometry.png>
 Package pdftex.def Info: Pictures/Geometry.png  used on input line 77.
@@ -1168,20 +1164,20 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [10]
-<Pictures/MiniExampleResults.png, id=209, 940.51375pt x 575.14874pt>
+
+LaTeX Warning: Reference `doiSinteringAdhesion' on page 11 undefined on input line 441.
+
+<Pictures/MiniExampleResults.png, id=216, 940.51375pt x 575.14874pt>
 File: Pictures/MiniExampleResults.png Graphic file (type png)
 <use Pictures/MiniExampleResults.png>
-Package pdftex.def Info: Pictures/MiniExampleResults.png  used on input line 444.
+Package pdftex.def Info: Pictures/MiniExampleResults.png  used on input line 445.
 (pdftex.def)             Requested size: 278.69475pt x 170.43092pt.
-<Pictures/ResultFromDynamicSintering.jpg, id=212, 1027.84pt x 758.835pt>
+<Pictures/ResultFromDynamicSintering.jpg, id=219, 1027.84pt x 758.835pt>
 File: Pictures/ResultFromDynamicSintering.jpg Graphic file (type jpg)
 <use Pictures/ResultFromDynamicSintering.jpg>
-Package pdftex.def Info: Pictures/ResultFromDynamicSintering.jpg  used on input line 451.
+Package pdftex.def Info: Pictures/ResultFromDynamicSintering.jpg  used on input line 452.
 (pdftex.def)             Requested size: 278.69475pt x 205.7566pt.
 
-Underfull \vbox (badness 7796) has occurred while \output is active []
-
-
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1190,7 +1186,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[11{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <./Pictures/MiniExampleResults.png>] (./LunaIcy_Math_Backround.bbl
+[11{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <./Pictures/MiniExampleResults.png>]
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1199,11 +1195,29 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
-[12 <./Pictures/ResultFromDynamicSintering.jpg>])
+[12 <./Pictures/ResultFromDynamicSintering.jpg>] (./LunaIcy_Math_Backround.bbl
 
-[13
 
-] (./LunaIcy_Math_Backround.aux)
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[13]
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[14
+
+])
+
+[15] (./LunaIcy_Math_Backround.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -1212,25 +1226,22 @@ L3 programming layer <2025-01-18>
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: There were multiply-defined labels.
-
 Package rerunfilecheck Info: File `LunaIcy_Math_Backround.out' has not changed.
-(rerunfilecheck)             Checksum: 04833286C08DA40950DDE64B7BD65C29;2241.
+(rerunfilecheck)             Checksum: 3B3FCBD6A718D5BF9A0676ABCA620904;2332.
  ) 
 Here is how much of TeX's memory you used:
- 37605 strings out of 473190
- 750588 string characters out of 5715801
- 1322638 words of memory out of 5000000
- 60147 multiletter control sequences out of 15000+600000
+ 37611 strings out of 473190
+ 750664 string characters out of 5715801
+ 1322883 words of memory out of 5000000
+ 60150 multiletter control sequences out of 15000+600000
  573720 words of font info for 70 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  101i,19n,145p,1123b,909s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm2488.pfb>
-Output written on LunaIcy_Math_Backround.pdf (13 pages, 922774 bytes).
+Output written on LunaIcy_Math_Backround.pdf (15 pages, 932897 bytes).
 PDF statistics:
- 320 PDF objects out of 1000 (max. 8388607)
- 235 compressed objects within 3 object streams
- 40 named destinations out of 1000 (max. 500000)
- 284 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 336 PDF objects out of 1000 (max. 8388607)
+ 249 compressed objects within 3 object streams
+ 43 named destinations out of 1000 (max. 500000)
+ 292 words of extra memory for PDF output out of 10000 (max. 10000000)
 
