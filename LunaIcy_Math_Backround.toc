@@ -1,17 +1,17 @@
 \babel@toc {english}{}\relax 
 \contentsline {chapter}{Contents\ttl@gmk {\@mkboth {\MakeUppercase []{Contents}}{\MakeUppercase []{Contents}}}}{1}{chapter*.1}%
-\contentsline {section}{\numberline {1}Introduction}{1}{section.0.1}%
-\contentsline {section}{\numberline {2}Physics behind the model}{3}{section.0.2}%
-\contentsline {subsection}{\numberline {2.1}Physics behind the ODE}{3}{subsection.0.2.1}%
-\contentsline {subsection}{\numberline {2.2}Physics behind the PDE}{4}{subsection.0.2.2}%
-\contentsline {section}{\numberline {3}Numerical Solution of the ODE}{5}{section.0.3}%
-\contentsline {section}{\numberline {4}Numerical Solution of the PDE}{6}{section.0.4}%
-\contentsline {section}{\numberline {5}Geometry}{7}{section.0.5}%
-\contentsline {subsection}{\numberline {5.1}Grain Volume}{7}{subsection.0.5.1}%
-\contentsline {subsection}{\numberline {5.2}Bond Volume}{9}{subsection.0.5.2}%
-\contentsline {subsection}{\numberline {5.3}Surface Area and Curvature}{10}{subsection.0.5.3}%
-\contentsline {subsection}{\numberline {5.4}Finding the Intersection of Bond and Grain Area}{11}{subsection.0.5.4}%
-\contentsline {section}{\numberline {6}Simulations}{11}{section.0.6}%
-\contentsline {section}{\numberline {7}Outlook}{12}{section.0.7}%
-\contentsline {chapter}{Bibliography}{15}{chapter*.5}%
+\contentsline {section}{\numberline {1}Introduction}{2}{section.0.1}%
+\contentsline {section}{\numberline {2}Physics behind the model}{5}{section.0.2}%
+\contentsline {subsection}{\numberline {2.1}Physics behind the ODE}{5}{subsection.0.2.1}%
+\contentsline {subsection}{\numberline {2.2}Physics behind the PDE}{5}{subsection.0.2.2}%
+\contentsline {section}{\numberline {3}Numerical Solution of the ODE}{6}{section.0.3}%
+\contentsline {section}{\numberline {4}Numerical Solution of the PDE}{7}{section.0.4}%
+\contentsline {section}{\numberline {5}Geometry}{8}{section.0.5}%
+\contentsline {subsection}{\numberline {5.1}Grain Volume}{9}{subsection.0.5.1}%
+\contentsline {subsection}{\numberline {5.2}Bond Volume}{10}{subsection.0.5.2}%
+\contentsline {subsection}{\numberline {5.3}Surface Area and Curvature}{11}{subsection.0.5.3}%
+\contentsline {subsection}{\numberline {5.4}Finding the Intersection of Bond and Grain Area}{12}{subsection.0.5.4}%
+\contentsline {section}{\numberline {6}Simulations}{12}{section.0.6}%
+\contentsline {section}{\numberline {7}Outlook}{13}{section.0.7}%
+\contentsline {chapter}{Bibliography}{15}{chapter*.6}%
 \contentsfinish 
