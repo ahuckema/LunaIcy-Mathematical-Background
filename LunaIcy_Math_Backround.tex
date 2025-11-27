@@ -65,22 +65,22 @@
         \vspace{0.2cm}
         \small 
         \noindent 
-        This little report explores \cite{https://doi.org/10.48550/arxiv.2410.15844} the sintering of ice grains in the ice sheet of Jupiters moon Europa. It approaches the problem from a mathematical point of view and attempts to reimpliments the scheme. In this paper the sintering was modeled via a system of ODEs that where coupled with a heat equation. The difference to the original paper is that here the numerical scheme uses implicit Euler to solve the ODE and by doing so, avoids the limitation of the small step size that occure due to the stiffnes of the problem. Second, a solver for the heat equation is here derived by hand. It handles the Neuman boundary data by incorporating ghost cells and solves the PDE with the method of lines. The resulting system of ODEs is again due to stiffness solved via implicit Euler. Note that due to the fact that in the given PDE there is no standard Lapalce operator a three point stencil cannot be derived using finite differences dirctly. Using finite volumes combined with finite differences however yields a three point method. Finally, in a fun little excersize the geometry of the ice grains was derived via manifold integrals, but not used in the implimation as their solution was more complex compared to the simple analytic solution.
+        This report explores the paper "LunaIcy" \cite{https://doi.org/10.48550/arxiv.2410.15844} the sintering of ice grains in the ice sheet of Jupiter's moon Europa. It approaches the problem from a mathematical point of view and attempts to reimpliments the scheme. In this paper the sintering was modeled via a system of ODEs that where coupled with a non-standard heat equation. In contrast to the paper this report uses the numerical scheme of implicit Euler to solve the ODE and by doing so, avoids the limitation of the small step size that occur due to the stiffness of the problem. Additionally, here, a solver specifically tailored for the non-standard heat equation is here proposed. It handles the Neumann boundary data by incorporating ghost cells and solves the PDE with the method of lines. The resulting system of ODEs is again, due to stiffness, solved via implicit Euler. As in the given PDE there is no standard Laplace operator, a three point stencil cannot be derived using finite differences directly. Using finite volumes combined with finite differences, however, yields a three point method allowing for computational efficiency. The appendix details a rigorous derivation of the grain-bond geometry using manifold integrals, offering a generalized framework for future exploration of complex grain shapes.
         \vspace{0.3cm} 
     \end{minipage}
 \end{center}
 
 \textbf{Motivation:}
-In light of the upcoming missions planned to Jupiters moon Europa such as JUICE and even mission that will attempt to drill through the ice sheet, the geometry of the ice grains are of great interest in order to succefully navigate such a mission! Such a model for the ice sheet does not only depend on the sintering, but also on external influences such as temperature, radiation and micro meteor impacts. A deterministic model was proposed in \cite{https://doi.org/10.48550/arxiv.2410.15844} that couples the sintering and temperature. Future work would extend this deterministic model to a stochastic one that includes micro meteor impacts. In order to make worst case bounds on the microstructure of such a stochastic model one would need to rely on extreme value theory for stochastic processes. This is briefly motivated in the Outlook. The rest of this report focuses on the reimplementation of the deterministic model.
+In light of the upcoming missions planned to Jupiter's moon Europa such as JUICE and even mission that will attempt to drill through the ice sheet, the geometry of the ice grains are of great interest in order to successfully navigate such a mission. Such a model for the ice sheet does not only depend on sintering, but also on external influences such as temperature, radiation and micro meteor impacts. A deterministic model was proposed in "LunaIcy" \cite{https://doi.org/10.48550/arxiv.2410.15844} that couples the sintering and temperature. Future work would extend this deterministic model to a stochastic one that includes micro meteor impacts. In order to make worst case bounds on the microstructure of such a stochastic model one could need extreme value theory for stochastic processes. This is briefly motivated in the outlook. The rest of this report focuses on the reimplementation of the deterministic model.
 
 
 
 
-Consider a one dimensional slice of the Ice sheet of Jupiters moon Europa. This is our state space $\Omega := [0,d] \subset \mathbb{R}$ where $d$ denotes the depth od the ice sheet. We now try to model the changing ice grains and their bonds to their neighboring grains such that a steady state (fixed point of the dynamic system) is reached that aims to explain the ice grain and bond size in the ice sheet of Europa. In \cite{https://doi.org/10.48550/arxiv.2410.15844} it was proposed that the low thermal inertia of the porous ice can give way for us to presume that the depth of significant tenperature changes before dissipation is very low (only a few centimeters). Thus in the following study the ice sheet can be limited to only a small depth. Further, due the low thermal inertia the bottom for the to be defined heat equation the boundary data should ensure that the temperature change has vanished, when reaching the bottom.
+Consider a one dimensional slice of the Ice sheet of Jupiter's moon Europa. This is our state space $\Omega := [0,d] \subset \mathbb{R}$ where $d$ denotes the depth of the ice sheet. We now try to model the changing ice grains and their bonds to their neighboring grains such that a steady state (fixed point of the dynamic system) is reached that aims to explain the ice grain and bond size in the ice sheet of Europa. In \cite{https://doi.org/10.48550/arxiv.2410.15844} it was proposed that the low thermal inertia of the porous ice can give way for us to presume that the depth of significant temperature changes before dissipation is very low (only a few centimeters). Thus, in the following study the ice sheet can be limited to only a small depth. Further, due the low thermal inertia the bottom for the to be defined heat equation the boundary data should ensure that the temperature change has vanished, when reaching the bottom.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{Pictures/Overview.png}
-  \caption{Overview of the discretization space $\Omega_h$ and the microsstructure at each grid point and temperature that is coupled.}
+  \caption{Overview of the discretization space $\Omega_h$ and the microstructure at each grid point and temperature that is coupled.}
   \label{Fig: Overview}
 \end{figure}
 Choose some discretization of the state space $\Omega_h \subset \Omega$ where $|\Omega_h|$ is the number of grid points that slice. Note that every grid points is made up of a lot of ice crystals. The one we model via grid point is supposed to be a average representation of these crystals. In every state $x \in \Omega_h$ we denote the microstructure $(r_g (x,t) , r_b (x,t))^T$, where $r_g$ is the grain radius and $r_b$ is the bond radius at time $t \geq 0$. 
@@ -90,12 +90,12 @@ Choose some discretization of the state space $\Omega_h \subset \Omega$ where $|
   \caption{Illustration of the Grain and Bond geometry \cite{https://doi.org/10.48550/arxiv.2410.15844}. In this report I denoted $M_g$ and $M_b$ as $S_g$ and $S_b$ respectively. It describes the surface area of the grain and bond.}
   \label{Fig: Geometry}
 \end{figure}
-This change of radii/microstructure is modeled indirectly via the water vapor transport. Consider the conservation law (i.e. we have a closed system that does not loose or gain mass) 
+This change of radii/microstructure is modeled indirectly via the water vapor transport. Consider the conservation law (i.e. we have a closed system that does not lose or gain mass) 
 \[
 \frac{\partial}{\partial t} (m_g (x,t) + m_b (x,t) + m_{gas}(x,t)) =0, \quad x \in \Omega_h, t \geq 0,
 \]
 where $m_g$ is the mass of the grain, $m_b$ mass of the bonds between two grains (we assume two bonds for each grain) and $m_{gas}$ the mass of the surrounding gas vapor mass in the pores. Note that this conservation law is assumed to be locally valid, i.e. for every $x \in \Omega_h$, i.e. we do not assume that gas mass moves between states. This could be a future extension of the model.\\
-A benifit of the approach of modelling the masses is that we do not make assumptions on the underlying intial water vapor pressure, but only on its initial mass. Using the the Hertz-Knudsen formula mass transport only occurs proportionally to the difference in gas pressure in the pore space and the saturated water vapor pressure over a flat surface. It is defined for every $x \in \Omega_h$ as
+A benefit of the approach of modelling the masses is that we do not make assumptions on the underlying initial water vapor pressure, but only on its initial mass. Using the Hertz-Knudsen formula mass transport only occurs proportionally to the difference in gas pressure in the pore space and the saturated water vapor pressure over a flat surface. It is defined for every $x \in \Omega_h$ as
 \begin{align}
     \label{Eq: Hertz Knudsen}
 &\frac{\partial}{\partial t} m_{gas} (x,t) \notag \\
@@ -103,7 +103,7 @@ A benifit of the approach of modelling the masses is that we do not make assumpt
     J_b (t,T(x,t), r_b(x,t), m_{gas}(x,t) ) S_b (t, r_g(x,t),r_b (x,t))\notag\\
     &=: J_g(x,t) S_g(x,t) + J_b(x,t) S_b(x,t),
 \end{align}
-which is an asymptotic stable linear ODE (in section 2.1 it can be seen that the flux $J_i$ is linear in $m_{gas}$ and has negative derivative). Here $S_{g}$ denotes the area of the grain in contact with the outward gas and $J_{g}$ is the repective flux, $ S_{b}(t)$ the area of the bond in contact with the gas and $J_b$ is the respective flux. Only if these fluxes are non zero sublimation will occur. We assume that this fixed point is reached instantanuously, i.e. we assume $ \frac{\partial}{\partial t} m_{gas}(x,t)=0$. Then grain/bond gains/losses of mass is described according to 
+which is an asymptotic stable linear ODE (in section 2.1 it can be seen that the flux $J_i$ is linear in $m_{gas}$ and has negative derivative). Here $S_{g}$ denotes the area of the grain in contact with the outward gas and $J_{g}$ is the respective flux, $ S_{b}(t)$ the area of the bond in contact with the gas and $J_b$ is the respective flux. Only if these fluxes are non-zero sublimation will occur. We assume that this fixed point is reached instantaneously, i.e. we assume $ \frac{\partial}{\partial t} m_{gas}(x,t)=0$. Then grain/bond gains/losses of mass is described according to 
 \[
 \frac{\partial}{\partial t} m_{i} (x,t) = - J_{i}(x,t) S_{i}(x,t), \quad i=g,b.
 \] 
@@ -111,7 +111,7 @@ As we will soon see the heat equation needs the radii $r_g,r_b$ to calculate the
 \[
 V_g (x,t+ \tau ) = \frac{m_g(x,t+ \tau)}{\rho_0}, \quad V_b (x,t+ \tau) = \frac{m_b(x,t+ \tau)}{\rho_0} ,
 \]
-and then retrive their respective radii via 
+and then retrieve their respective radii via 
 \begin{equation}
 \label{Eq: f}
 \begin{pmatrix}
@@ -122,8 +122,8 @@ and then retrive their respective radii via
     |\frac{m_b(x,t+ \tau)}{\rho_0}  - v_b (r_g,r_b)|
 \end{pmatrix} ,
 \end{equation}
-where $v_g$ are calculated using Equation (\ref{Eq: vg}) and (\ref{Eq: vb}). As seen in Figure \ref{Fig: Geometry} the point (actually circle) $\hat{x^*}$ denotes the point/area where the two surface areas of the grain and bond intersect. Thus, while optimizing for $r_g$ and $r_g$ the above function also needs to calculate $\hat{x}^*$ for every radii that is suggested by the minimization problem. This is briefly touched upon in Section 5.4. Note that Equation ()\ref{Eq: f}) is a non-trivial optimization problem that will not be further discussed. \\
-We have now described the dynamics for each microstructure in a specific state $x \in \Omega$, i.e. we have a system of $|\Omega_h|$ many ODEs. As seen in the definitions of the fluxes, they also depend on the local temperature $T(x,t)$, i.e. the temperature of state $x \in \Omega_h$ at time $t\geq 0$. This means the system is now coupled with a heat equation on the same state space. The average temperature at $x \in \Omega_h$ is modelled via the heat eqaution with Neuman boundary data
+where $v_g$ are calculated using Equation (\ref{Eq: vg}) and (\ref{Eq: vb}). As seen in Figure \ref{Fig: Geometry} the point (actually circle) $\hat{x^*}$ denotes the point/area where the two surface areas of the grain and bond intersect. Thus, while optimizing for $r_g$ and $r_g$ the above function also needs to calculate $\hat{x}^*$ for every radius that is suggested by the minimization problem. This is briefly touched upon in Section 5.4. Note that Equation ()\ref{Eq: f}) is a non-trivial optimization problem that will not be further discussed. \\
+We have now described the dynamics for each microstructure in a specific state $x \in \Omega$, i.e. we have a system of $|\Omega_h|$ many ODEs. As seen in the definitions of the fluxes, they also depend on the local temperature $T(x,t)$, i.e. the temperature of state $x \in \Omega_h$ at time $t\geq 0$. This means the system is now coupled with a heat equation on the same state space. The average temperature at $x \in \Omega_h$ is modelled via the heat equation with Neumann boundary data
 \begin{align}
     \label{PDE}
 \rho c_p \frac{\partial}{\partial t} T(x,t) &= \frac{\partial}{\partial x} k(f(m_g(x,t),m_b (x,t))) \frac{\partial}{\partial x} T(x,t), \quad x \in \Omega, t>0 \\
@@ -137,7 +137,7 @@ Thus, in total we need to solve in each time step for $m_{gas}$, the ODE, the op
 
 
 \section{Physics behind the model}
-Here the Physics will be given a little overview. As I am not a phsisist, this is only a broad overview.
+Here the Physics will be given a little overview. As I am not a physicist, this is only a broad overview.
 \subsection{Physics behind the ODE}
 The pressure of the surrounding gas/water vapor $P_{gas} (x,t) $ at time $t$ and state $x \in \Omega_h$. $P_{K_j} (x,t)$ denotes the equilibrium vapor pressure of a curved surface $j=g,b$ with average curvature $K_j$. Note that in general it holds 
 \[
@@ -157,7 +157,7 @@ P_{gas} (T(x,t)) := \frac{m_{gas} (x,t) R T(x,t)}{M V_{pore}} =\frac{(1-\phi) m_
 \]
 where $V_g$ denotes the volume of the grain, $m_{gas}$ the equilibrium mass of water vapor mass and $\phi$ denotes the porosity.
 \subsection{Physics behind the PDE}
-The lower boundary data was described in the introduction. Here we will briefly describe the upper boundery data. Remember that 
+The lower boundary data was described in the introduction. Here we will briefly describe the upper boundary data. Remember that 
 \[
 k(0,t) \frac{\partial}{\partial x}  T(0,t) = - F_{solar} (t) + \epsilon \sigma_{SB} T(0,t)^4. 
 \]
@@ -165,8 +165,8 @@ The function $F_{solar}$ gives us the day and night cycle (eclipses by Jupiter a
 \[
 F_{solar } (t, \lambda, \psi) := (1- A(\lambda, \psi)) \frac{G_{sc}}{d(t)^2} \cos (\theta_i (t,\lambda,\psi)) \textbf{1}_{\{ \cos (\theta_i (t,\lambda,\psi))>0 \}},
 \]
-where $A$ is the surface albedo, $G_{sc}$ the solar constant and $\theta_i$ is the solar incidence angle abd $d(t)$ is the distance to the sun. Note that using this indicator function we can easily model the day and night cycle. \\ 
-The other terms in the heat eqaution are described as follows. 
+where $A$ is the surface albedo, $G_{sc}$ the solar constant and $\theta_i$ is the solar incidence angle and $d(t)$ is the distance to the sun. Note that using this indicator function we can easily model the day and night cycle. \\ 
+The other terms in the heat equation are described as follows. 
 \[
 \rho (\phi) = \rho_0 (1- \phi)
 \]
@@ -174,7 +174,7 @@ is the density of porous ice and $c_p$ is the ice heat capacity constant. Note t
 \[
 k(\phi,r_b,r_g) = k_0 (T(x,t)) (1-\phi) \frac{r_b}{r_g}.
 \]
-This last term is here links the PDE to the ODE that describes sintering.
+This last term here links the PDE to the ODE that describes sintering.
 
 \section{Numerical Solution of the ODE}
 First we need to solve for the equilibrium mass of the water vapor mass $m_{gas}(x,t)$ in each state $x \in \Omega_h$ at time $t \geq 0$. Remember the conservation law, which yielded that $\frac{d}{dt} m_{gas}(t) =0$. We can solve it by an algebraically solvable equation:
@@ -200,7 +200,7 @@ Finally, we need to solve for every $x \in \Omega_h$ the system of ODEs given by
      - J_b (t,T(x,t), r_b(x,t), m_{gas}(x,t) ) S_b (t, r_g(x,t),r_b (x,t))
 \end{pmatrix},
 \]
-altough we solve the for the radii by 
+although we solve the for the radii by 
 \[
 \begin{pmatrix}
     r_g (x,t+\tau) \\ 
@@ -223,7 +223,7 @@ In order for the notation not to blow up, we will write the Equation (\ref{Eq: H
 \frac{\partial }{\partial t}  m_{gb} (x,t)  =: F(f(m_{gb}(x,t)),T(x,t)),
 \]
 where $f(m_{gb}(x,t)) =( r_g (x,t),r_b (x,t))$ and $T(x,t)$ denotes the temperature.\\
-To numerically solve the PDE (\ref{PDE}) we first discretize the state space by $\Omega_h \subset \Omega$ and use the method of lines approach. We integrate both sides from $[x_{i-\frac{1}{2}}, x_{i+ \frac{1}{2}}]$ and divide by the length of the intervall $h$: 
+To numerically solve the PDE (\ref{PDE}) we first discretize the state space by $\Omega_h \subset \Omega$ and use the method of lines approach. We integrate both sides from $[x_{i-\frac{1}{2}}, x_{i+ \frac{1}{2}}]$ and divide by the length of the interval $h$: 
 \begin{align*}
 &\rho c_p  \frac{\partial}{\partial t} T(x,t) = \frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) \\
 &\iff \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho c_p  \frac{\partial}{\partial t} T(x,t) dx = \frac{1}{h} \int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) dx \\
@@ -231,7 +231,7 @@ To numerically solve the PDE (\ref{PDE}) we first discretize the state space by 
 &\iff \frac{\partial}{\partial t} \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho  c_p   T(x,t) dx \\
 &\qquad = \frac{1}{h} \left( k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h} + \mathcal{O}(h^2) \right).
 \end{align*}
-Thus for every $x_i$ we get the approximate ODE (second order error)
+Thus, for every $x_i$ we get the approximate ODE (second order error)
 \[
 \frac{\partial}{\partial t} \frac{1}{h}\int_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \rho  c_p   T(x,t) dx \approx k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h^2} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h^2} .
 \]
@@ -239,18 +239,18 @@ We will approximate the left hand side integral by its center point (mean value 
 \[
 \frac{\partial}{\partial t} \frac{1}{h}  \rho  c_p  T(x_i,t)  h \approx k(x_{i+\frac{1}{2}},t) \frac{T(x_{i+1},t)-T(x_i,t)}{h^2} -  k(x_{i-\frac{1}{2}},t) \frac{T(x_i,t) - T(x_{i-1},t)}{h^2} .
 \]
-This approximation only holds for the interior of our domain $\Omega$. In order to include the boundary data into the solution we need to handle the Neumann boundary data (\ref{Neumann}) on both sides. This is doen by introducing ghost cells. We aproximate the boundary data by symmetric differences, i.e. also second order, we get 
+This approximation only holds for the interior of our domain $\Omega$. In order to include the boundary data into the solution we need to handle the Neumann boundary data (\ref{Neumann}) on both sides. This is done by introducing ghost cells. We approximate the boundary data by symmetric differences, i.e. also second order, we get 
 \begin{align*}
     &k(x_0,t) \frac{T( x_{1} ,t) -T(x_{-1},t)}{2h} + \mathcal{O}(h^2) = -F_{solar} (t) + \epsilon \sigma_{SB}
  T(x_0 , t)^4 \\
  & k(x_d,t) \frac{T(x_{d+1},t) - T(x_{d-1},t)}{2h} + \mathcal{O}(h^2) =0.
 \end{align*}
-Thus approximately it holds 
+Thus, approximately it holds 
 \begin{align*}
     &T(x_{-1},t) \approx   \frac{2h}{k(x_0,t)} \left(   F_{solar} (t)-\epsilon \sigma_{SB} T(x_0,t)^4  \right) +T(x_1,t) =: T_{-1} (t)  \\
     &T(x_{d+1},t) =  T(x_{d-1} ,t).
 \end{align*}
-Thus in total the following system of ODEs needs to be solved 
+In total the following system of ODEs needs to be solved 
 \begin{align*}
    \frac{\partial }{\partial t}  \begin{pmatrix}
         m_{gb} (x_0,t) \\
@@ -305,75 +305,12 @@ This is a stiff system of ODEs which is why we solve it via implicit Euler.
 \section{Geometry}
 Here the volumes of the grains and bonds will be determined, as they are essential in the dynamics of the model.
 \subsection{Grain Volume}
-Note that the following calculations are unnesserarly overcomplicated, but it is a nice excersize to recap on some methods for integration. We will stick with the simple solution obtained from simple analytics:
+The simple analytic solution for the volume of a quarter grain that is cut of by the hyperplane $\hat{x}^*$ is given by
 \begin{equation}
 \label{Eq: vg}
 v_g (r_g, r_b) := \frac{4}{3}\pi r_g^3-\frac{\pi (r_g -\hat{x}^*)^2}{3} (2r_g +\hat{x}^*),
 \end{equation}
-where $\hat{x}^*$ is obtained from the root finding problem in section 5.4.
-\\
-Now to the overcomplicated approach: We begin by calulcating $1/4$ of the grains volume, where it is cut of at $\hat{x}^*$ at the $x_1 $ axis. This is the volume of the following set:
-\[
-V^{r_g} := \{ x \in \mathbb{R}^3 \mid |x| < r_g, 0 \leq x_1 < \hat{x}^*, 0 \leq x_2 \}.
-\]
-Further, for $u: \mathbb{R}^3 \to \mathbb{R}, x \mapsto \sqrt{x^2_1 +x^2_2 + x_3^2} = |x| $ the level set $u^{-1}$ describes the set of all points on the sphere $S_r^2$ with radius $r$. Cearly for all $x \in u^{-1} (r)$ the gradient is $\nabla u = \left( \frac{x_1}{r}, \frac{x_2}{r} , \frac{x_3}{r} \right)$ satisfies $|\nabla u|=1$. With the Co-area formula it holds 
-\[
-\int_{V^{r_g}} |\nabla u| d^3 x = \int_0^{r_g} \int_{ V^{r_g} \cap u^{-1}(r)} d \sigma (z) dr.
-\]
-Define the parametrization $\phi_r : U_r \to V^{r_g} \cap u^{-1} (r) , (\theta,\vartheta) \mapsto (r \sin (\vartheta) \cos (\theta),r \sin (\theta) \sin (\vartheta), r \cos (\vartheta))$, where \[
-U_r := \{ (\theta, \vartheta) \in [0, \frac{\pi}{2}] \times [0,\pi] \mid  r \sin (\vartheta) \cos (\theta) < \hat{x}^* \}. 
-\]
-Its partial derivatives are 
-\begin{align*}
-&\frac{\partial}{\partial \theta} \phi_r (\theta, \vartheta) = (-r \sin (\vartheta ) \sin (\theta), r \cos (\theta) \sin (\vartheta),0) \\
-& \frac{\partial}{\partial \vartheta} \phi_r (\theta, \vartheta) = (r \cos (\vartheta) \cos (\theta), r  \sin(\theta) \cos (\vartheta),-r \sin (\vartheta)).
-\end{align*}
-Then it holds that 
-\[
-\det \left(  \begin{pmatrix}
-    (\frac{\partial}{\partial \theta} \phi_r)^T \frac{\partial}{\partial \theta} \phi_r & (\frac{\partial}{\partial \theta} \phi_r)^T \frac{\partial}{\partial \vartheta} \phi_r \\
-    (\frac{\partial}{\partial \vartheta} \phi_r)^T \frac{\partial}{\partial \theta} \phi_r & (\frac{\partial}{\partial \vartheta} \phi_r)^T \frac{\partial}{\partial \vartheta} \phi_r
-\end{pmatrix} \right) = \det \left( \begin{pmatrix}
-    r^2 \sin (\vartheta)^2 &0 \\ 0 & r^2
-\end{pmatrix} \right) = r^4 \sin (\vartheta)^2.
-\]
-Thus, the manifold integral is given by 
-\begin{align*}
-&\int_0^{r_g} \int_{ V^{r_g} \cap u^{-1}(r)} d \sigma (z) dr = \int_0^{r_g} \int_{ U_r} 1 \circ \phi_r(\theta) \sqrt{\det((\phi^\prime) ^T \phi^\prime)} d(\theta,\vartheta) dr \\
-&= \int_0^{r_g} \int_{ U_r}  1\cdot r^2 \sin (\vartheta) d (\theta,\vartheta) dr
-\end{align*}
-For $\hat{x}^* > r_g$ this integral is trivial equal to $\int_0^{r_g}\pi r^2 dr = \pi \frac{r_g^{3}}{3}$. More interesting in this application is the opposite case. In order to solve it, we use Fubini (where $U_r^\theta := \{ \vartheta \in [0,\pi] \mid (\theta,\vartheta) \in U_r \}$) 
-\[
-\int_0^{r_g} \int_{ U_r}   r^2 \sin (\vartheta) d (\theta,\vartheta) dr= \int_0^{r_g} r^2 \int_0^{\pi/2} \int_{ U_r^\theta }   \sin (\vartheta) d \vartheta d\theta dr
-\]
-We now need to take a closer look at the inner most integral. The condition $\sin (\vartheta) < \frac{\hat{x}^*}{r \cos (\theta)}$ is satified if we choose $\theta = arcos (\frac{\hat{x}^*}{r})$ or larger, because 
-\[
-\sin (\vartheta) \leq 1 = \frac{\hat{x}^*}{r \cos arcos (\frac{\hat{x}^*}{r})} \text{ is always satisfied.}
-\]
-Thus for $\theta \geq arcos (\frac{\hat{x}^*}{r})$ we need no restriction. For $\theta < arcos (\frac{\hat{x}^*}{r})$ our condition is only satisfied, if
-\[
-\vartheta = \underbrace{arcsin (\frac{\hat{x}^*}{r \cos (\theta)})}_{=: B} 
-\]
-or smaller. It is also satified during this choice of $\theta  < arcos (\frac{\hat{x}^*}{r})$, if 
-\[
- \pi - B < \vartheta \leq \pi, \text{ because } 0<\sin(\pi-arcsin (\frac{\hat{x}^*}{r \cos (\theta)}) )  < \frac{\hat{x}^*}{r \cos (arcos (\frac{\hat{x}^*}{r}))} =1
-\]
-and on that proposed intervall $\sin (\vartheta)$ is monotonically decreasing. In total we get for $r < r_g$:
-\begin{align*}
-   &\int_0^{\pi/2} \int_{ U_r^\theta }   \sin (\vartheta) d \vartheta d \theta = \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( \int^{ B}_0 \sin (\vartheta) d \vartheta +\int_{\pi-B}^\pi \sin (\vartheta) d \vartheta   \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2} \int_0^\pi   \sin(\vartheta) d \vartheta d \theta \\
-   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( \cos (0) - \cos (B) + \cos (\pi -B)-\cos (\pi) \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2}    \cos(0)-\cos (\pi)   d \theta \\
-   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( 1 - \cos (B) +\cos (\pi -B)+1 \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2}    2   d \theta \\
-   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( 2 - \cos (B) -\cos (B) \right) d \theta  + 2 \left(  \frac{\pi}{2} - arcos(\frac{\hat{x}^*}{r})\right)\\
-   &= 2arcos (\frac{\hat{x}^*}{r}) -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \cos (B)  d \theta  +  \pi- 2 arcos(\frac{\hat{x}^*}{r})\\
-   &= \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \cos (arcsin (\frac{\hat{x}^*}{r \cos (\theta)}))  d \theta  \\
-   &= \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta 
-\end{align*}
-Finally for $\hat{x}^* \leq r_g$ we get that
-\begin{align*}
-&\int_{V^{r_g}}  d^3 x= \int_0^{r_g} r^2 \text{1}_{0 \leq r < \hat{x}^*} \left( \pi - 2 \cdot 0\right)+ r^2 \left( \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta \right)  \text{1}_{ \hat{x}^*< r \leq r_g}  d r \\
-&= \pi \frac{(\hat{x}^*)^3}{3}+\pi \left( \frac{r_g^3}{3} - \frac{(\hat{x}^*)^3}{3} \right) - 2\int^{r_g}_{\hat{x}^*} r^2 \underbrace{\int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta}_{=: A(\hat{x}^*,r)} dr.
-\end{align*}
-Note that $A(\hat{x}^*,r)$ does not have an analytical solution and needs to be solved numerically. Note that we only calculated $1/4^{th}$ of its volume, i.e. we need to multiply the resulting value by $4$.
+where $\hat{x}^*$ is obtained from the root finding problem in section 5.4. A more complicated solution via manifold integrals can be found in the Appendix.
 \subsection{Bond Volume}
 The area of interest is 
 \[
@@ -381,10 +318,10 @@ V^{r_b} := \{x \in \mathbb{R}^3 \mid 0 \leq x_1 \leq r_g -\hat{x}^*, \sqrt{x_2^2
 \]
 Its Volume is easily given by 
 \begin{align*}
-&\int_{V^{r_p}} d^3 x = \int_0^{r_g - \hat{x}^*} \int_{\{ \sqrt{x_2^2+x_3^2 } \leq r(x_1) \}} d^2 (x_2,x_3) dx_1 = \int_0^{r_g - \hat{x}^*}  \pi r(x_1)^2 dx_1 \\
+&\int_{V^{r_p}} d^3 x =\int_0^{r_g - \hat{x}^*} \int_{\{ \sqrt{x_2^2+x_3^2 } \leq r(x_1) \}} d^2 (x_2,x_3) dx_1 = \int_0^{r_g - \hat{x}^*}  \pi r(x_1)^2 dx_1 \\
 &= \int_0^{r_g - \hat{x}^*}  \pi (r_b + r_p)^2 dx_1  -2 (r_b + r_p)\underbrace{\pi \int_0^{r_g - \hat{x}^*}   \sqrt{r_p^2 -x_1^2}  dx_1}_{=:A} + \pi \int_0^{r_g - \hat{x}^*}  r_p^2 - \pi \int_0^{r_g - \hat{x}^*}  x^2 dx
 \end{align*}
-altough we denote $r(x_1) :=  r_b + r_p - \sqrt{r_p^2 -x_1^2} $. This is then 
+although we denote $r(x_1) :=  r_b + r_p - \sqrt{r_p^2 -x_1^2} $. This is then 
 \begin{align*}
 A &= \pi \left[  \frac{x_1}{2} \sqrt{r_p^2 -x_1^2} + \frac{r_p^2}{2} arcsin\left( \frac{x_1}{r_p} \right) \right]_0^{r_g-\hat{x}^*} \\
 &=  \pi \left(  \frac{r_g - \hat{x}^*}{2} \sqrt{r_p^2 -(r_g - \hat{x}^*)^2} + \frac{r_p^2}{2} arcsin\left( \frac{r_g - \hat{x}^*}{r_p} \right)\right) 
@@ -434,7 +371,7 @@ and thus
 S_b &= \int_0^{2 \pi} \int_0^{r_g -\hat{x}^*} r(x) \sqrt{1+ r^\prime (x)^2} dx d \theta \\
 &= 2 \pi \int_0^{r_g -\hat{x}^*} r(x) \sqrt{1+ \frac{x^2}{r_p^2 -x^2 } } dx = 2 \pi r_p \left( (r_b + r_p) arcsin (\frac{r_g-\hat{x}^*}{r_p} ) - (r_g - \hat{x}^*) \right).
 \end{align*}
-The curvature of the grain is $K_g = \frac{2}{r_g}$ and of the bond $K_b =- \frac{1}{r_b}$ repectively. The difference of sign is due to the fact that the bond is concave while the grain is convex.
+The curvature of the grain is $K_g = \frac{2}{r_g}$ and of the bond $K_b =- \frac{1}{r_b}$ respectively. The difference of sign is due to the fact that the bond is concave while the grain is convex.
 \subsection{Finding the Intersection of Bond and Grain Area}
 In each time step the geometry updates, which means that $\hat{x}^*$ changes in every time step. It describes the point where the surface area of the bond and grain intersect. We can formulate it as the solution of the equation 
 \[
@@ -444,26 +381,26 @@ This equation can be numerically solved as an root finding problem and its solut
 
 
 \section{Simulations}
-In this section the results from two different simulations will be presented. The first is a more simple one, where we assume constant temperature and only consider the sintering process for an individual ice grain and bond. It considers the development of the relative bond grain radius over time for different inital grain radii. In all cases, the original experiement by \ref{doiSinteringAdhesion} and the simulation in \cite{https://doi.org/10.48550/arxiv.2410.15844} get an objectively similar result. Note that no rigorous error from the original to my result was calculated. Nevertheless, the results are similar, as shown in my simulation:
+In this section the results from two different simulations will be presented. The first is a more simple one, where we assume constant temperature and only consider the sintering process for an individual ice grain and bond. It considers the development of the relative bond grain radius over time for different initial grain radii. In all cases, the original experiment by \ref{doiSinteringAdhesion} and the simulation in \cite{https://doi.org/10.48550/arxiv.2410.15844} get an objectively similar result. Note that no rigorous error from the original to my result was calculated. Nevertheless, the results are similar, as shown in my simulation:
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{Pictures/MiniExampleResults.png}
-  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results with constant temperture $-3$°C, sticking coefficient $\alpha=0.03$ and porosity $\phi=0.4$, altough the last constant was not mentioned in this particular example.}
+  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results with constant temperature $-3$°C, sticking coefficient $\alpha=0.03$ and porosity $\phi=0.4$, although the last constant was not mentioned in this particular example.}
   \label{Fig: MiniExample}
 \end{figure}
 
-The second simulation considers the entire coupled system, i.e. sintering in every state of the slice of the ice sheet with dynamic temperature described by the PDE. The intial bond radius is set to $r_b = 10^{-5}$ and the grain radius to $r_g = 10^{-4}$. Due to the fact that computational power is limited, the simulation was only run for $10$ days compared to the 1 million years in \cite{https://doi.org/10.48550/arxiv.2410.15844}. Still a objectively similar result is obtained, as the bond radii increase in size over time, especially above the diurnal skin depth. Underneath the diurnal skin depth there is no variation in the bond radii, as this is hard coded in the lower boundary condition of the PDE.
+The second simulation considers the entire coupled system, i.e. sintering in every state of the slice of the ice sheet with dynamic temperature described by the PDE. The initial bond radius is set to $r_b = 10^{-5}$ and the grain radius to $r_g = 10^{-4}$. Due to the fact that computational power is limited, the simulation was only run for $10$ days compared to the 1 million years in \cite{https://doi.org/10.48550/arxiv.2410.15844}. Still a objectively similar result is obtained, as the bond radii increase in size over time, especially above the diurnal skin depth. Underneath the diurnal skin depth there is no variation in the bond radii, as this is hard coded in the lower boundary condition of the PDE.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{Pictures/ResultFromDynamicSintering}
-  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results, altough here we let it run significantly shorter. The bond radii increase in size over time. This effect is increasingly above the Diurnal skin depth visible.}
+  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results, although here we let it run significantly shorter. The bond radii increase in size over time. This effect is increasingly above the Diurnal skin depth visible.}
   \label{Fig: Sintering}
 \end{figure}
 
 
 \section{Outlook}
-This study demonstrated that in a determistic setting sintering occurs above the diurnal skin depth of Europa's ice sheet. However, in order to make more realistic predictions on the ice sheet evolution, micro meteor impacts need to be considered. We assume that micro meteorites impacts change the porosity, density of the ice, temperature and mass of gas, grain and bonds. This is why we now consider the full state vector 
+This study demonstrated that in a deterministic setting sintering occurs above the diurnal skin depth of Europa's ice sheet. However, in order to make more realistic predictions on the ice sheet evolution, micro meteor impacts need to be considered. We assume that micro meteorites impacts change the porosity, density of the ice, temperature and mass of gas, grain and bonds. This is why we now consider the full state vector 
 \[
 u(x,t) := (T(x,t), m_g (x,t),m_b (x,t), \phi (x,t),\chi (x,t))^T,
 \]
@@ -478,7 +415,7 @@ where
 \[
 dI^{i}_{impacts} (x,t):= \int_{\mathcal{E}} \mathcal{G}_i( \lim_{\epsilon \searrow 0} u(x,t-\epsilon) ,E) \Phi (dt,dE), \quad i=1,2,3,4,
 \]
-where $\Phi$ is a Poisson point process on $\mathbb{R}^+ \times \mathcal{E}$ with intensity measure $\lambda \times \nu$, where $\lambda$ is the Lebesgue measure and $\nu$ a suitable measure on the space of Energy released by the meteor $\mathcal{E}$. The function $\mathcal{G}_i$ describes the change in the state vector due to an impact of a meteor with energy $E \in \mathcal{E}$. Due to the fact that an impact is assumed to be instantanuously, the resulting stochastic process $u(x,t)_{t \geq 0}$ is a jump process, i.e. Càdlàg, which forces us to use left limits in time. As long as there are no impacts, the stochastic Integral is zero and behaves deterministically. The rate of impacts is Poisson distributed. Thus we solve this system deterministically up to the next impact time. Note that this is a marked Poisson point process, where the marks are the energies at each impact of the meteor.\\
+where $\Phi$ is a Poisson point process on $\mathbb{R}^+ \times \mathcal{E}$ with intensity measure $\lambda \times \nu$, where $\lambda$ is the Lebesgue measure and $\nu$ a suitable measure on the space of Energy released by the meteor $\mathcal{E}$. The function $\mathcal{G}_i$ describes the change in the state vector due to an impact of a meteor with energy $E \in \mathcal{E}$. Due to the fact that an impact is assumed to be instantaneously, the resulting stochastic process $u(x,t)_{t \geq 0}$ is a jump process, i.e. Càdlàg, which forces us to use left limits in time. As long as there are no impacts, the stochastic Integral is zero and behaves deterministically. The rate of impacts is Poisson distributed. Thus, we solve this system deterministically up to the next impact time. Note that this is a marked Poisson point process, where the marks are the energies at each impact of the meteor.\\
 Note that the density on the Energy space $\mathcal{E}$ is of the form 
 \[
 \nu (dE) := A_{surf} \Psi (E) dE, \quad \Psi (E) \sim const. E^{-\beta},
@@ -490,10 +427,76 @@ M_T := \sup \{ E \in \mathcal{E} \mid (t,E) \in supp (\Phi) \cap [0,T] \times \m
 satisfies by definition of the Poission distribution
 \begin{align*}
 \mathbb{P}(M_t \leq e) &= \mathbb{P}( \Phi ([0,T] \times [e, \infty]) =0) = \exp(-\lambda (0,T) \cdot \nu ([e,\infty ])) = \exp (-T A_{surf} \int_e^\infty \Psi (E) dE) \\
-&= \exp \left( -T A_{surf} \frac{const.}{\beta -1} e^{-(\beta -1)} \right).
+&= \exp \left( -T A_{surf} \frac{const.}{\beta -1} e^{-(\beta -1)} \right),
 \end{align*}
-which is a Frèchet distribution! Thus in order to make assumptions on worst case scenario impacts that might effect missions to Europa, extreme value theory might be taken into consideration.
+which is a Frèchet distribution! In order to make assumptions on worst case scenario impacts that might effect missions to Europa, extreme value theory might be taken into consideration.
 
+
+\appendix 
+\chapter{Geometry}
+\section{Grain Volume}
+We begin by calculating $1/4$ of the grains volume, where it is cut of at $\hat{x}^*$ at the $x_1 $ axis. This is the volume of the following set:
+\[
+V^{r_g} := \{ x \in \mathbb{R}^3 \mid |x| < r_g, 0 \leq x_1 < \hat{x}^*, 0 \leq x_2 \}.
+\]
+Further, for $u: \mathbb{R}^3 \to \mathbb{R}, x \mapsto \sqrt{x^2_1 +x^2_2 + x_3^2} = |x| $ the level set $u^{-1}$ describes the set of all points on the sphere $S_r^2$ with radius $r$. Clearly, for all $x \in u^{-1} (r)$ the gradient is $\nabla u = \left( \frac{x_1}{r}, \frac{x_2}{r} , \frac{x_3}{r} \right)$ satisfies $|\nabla u|=1$. With the Co-area formula it holds 
+\[
+\int_{V^{r_g}} |\nabla u| d^3 x = \int_0^{r_g} \int_{ V^{r_g} \cap u^{-1}(r)} d \sigma (z) dr.
+\]
+Define the parametrization $\phi_r : U_r \to V^{r_g} \cap u^{-1} (r) , (\theta,\vartheta) \mapsto (r \sin (\vartheta) \cos (\theta),r \sin (\theta) \sin (\vartheta), r \cos (\vartheta))$, where \[
+U_r := \{ (\theta, \vartheta) \in [0, \frac{\pi}{2}] \times [0,\pi] \mid  r \sin (\vartheta) \cos (\theta) < \hat{x}^* \}. 
+\]
+Its partial derivatives are 
+\begin{align*}
+&\frac{\partial}{\partial \theta} \phi_r (\theta, \vartheta) = (-r \sin (\vartheta ) \sin (\theta), r \cos (\theta) \sin (\vartheta),0) \\
+& \frac{\partial}{\partial \vartheta} \phi_r (\theta, \vartheta) = (r \cos (\vartheta) \cos (\theta), r  \sin(\theta) \cos (\vartheta),-r \sin (\vartheta)).
+\end{align*}
+Then it holds that 
+\[
+\det \left(  \begin{pmatrix}
+    (\frac{\partial}{\partial \theta} \phi_r)^T \frac{\partial}{\partial \theta} \phi_r & (\frac{\partial}{\partial \theta} \phi_r)^T \frac{\partial}{\partial \vartheta} \phi_r \\
+    (\frac{\partial}{\partial \vartheta} \phi_r)^T \frac{\partial}{\partial \theta} \phi_r & (\frac{\partial}{\partial \vartheta} \phi_r)^T \frac{\partial}{\partial \vartheta} \phi_r
+\end{pmatrix} \right) = \det \left( \begin{pmatrix}
+    r^2 \sin (\vartheta)^2 &0 \\ 0 & r^2
+\end{pmatrix} \right) = r^4 \sin (\vartheta)^2.
+\]
+Thus, the manifold integral is given by 
+\begin{align*}
+&\int_0^{r_g} \int_{ V^{r_g} \cap u^{-1}(r)} d \sigma (z) dr = \int_0^{r_g} \int_{ U_r} 1 \circ \phi_r(\theta) \sqrt{\det((\phi^\prime) ^T \phi^\prime)} d(\theta,\vartheta) dr \\
+&= \int_0^{r_g} \int_{ U_r}  1\cdot r^2 \sin (\vartheta) d (\theta,\vartheta) dr
+\end{align*}
+For $\hat{x}^* > r_g$ this integral is trivial equal to $\int_0^{r_g}\pi r^2 dr = \pi \frac{r_g^{3}}{3}$. More interesting in this application is the opposite case. In order to solve it, we use Fubini (where $U_r^\theta := \{ \vartheta \in [0,\pi] \mid (\theta,\vartheta) \in U_r \}$) 
+\[
+\int_0^{r_g} \int_{ U_r}   r^2 \sin (\vartheta) d (\theta,\vartheta) dr= \int_0^{r_g} r^2 \int_0^{\pi/2} \int_{ U_r^\theta }   \sin (\vartheta) d \vartheta d\theta dr
+\]
+We now need to take a closer look at the innermost integral. The condition $\sin (\vartheta) < \frac{\hat{x}^*}{r \cos (\theta)}$ is satisfied if we choose $\theta = arcos (\frac{\hat{x}^*}{r})$ or larger, because 
+\[
+\sin (\vartheta) \leq 1 = \frac{\hat{x}^*}{r \cos arcos (\frac{\hat{x}^*}{r})} \text{ is always satisfied.}
+\]
+Thus for $\theta \geq arcos (\frac{\hat{x}^*}{r})$ we need no restriction. For $\theta < arcos (\frac{\hat{x}^*}{r})$ our condition is only satisfied, if
+\[
+\vartheta = \underbrace{arcsin (\frac{\hat{x}^*}{r \cos (\theta)})}_{=: B} 
+\]
+or smaller. It is also satified during this choice of $\theta  < arcos (\frac{\hat{x}^*}{r})$, if 
+\[
+ \pi - B < \vartheta \leq \pi, \text{ because } 0<\sin(\pi-arcsin (\frac{\hat{x}^*}{r \cos (\theta)}) )  < \frac{\hat{x}^*}{r \cos (arcos (\frac{\hat{x}^*}{r}))} =1
+\]
+and on that proposed interval $\sin (\vartheta)$ is monotonically decreasing. In total, we get for $r < r_g$:
+\begin{align*}
+   &\int_0^{\pi/2} \int_{ U_r^\theta }   \sin (\vartheta) d \vartheta d \theta = \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( \int^{ B}_0 \sin (\vartheta) d \vartheta +\int_{\pi-B}^\pi \sin (\vartheta) d \vartheta   \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2} \int_0^\pi   \sin(\vartheta) d \vartheta d \theta \\
+   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( \cos (0) - \cos (B) + \cos (\pi -B)-\cos (\pi) \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2}    \cos(0)-\cos (\pi)   d \theta \\
+   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( 1 - \cos (B) +\cos (\pi -B)+1 \right) d \theta  + \int_{arcos(\frac{\hat{x}^*}{r})}^{\pi/2}    2   d \theta \\
+   &= \int_0^{arcos (\frac{\hat{x}^*}{r})} \left( 2 - \cos (B) -\cos (B) \right) d \theta  + 2 \left(  \frac{\pi}{2} - arcos(\frac{\hat{x}^*}{r})\right)\\
+   &= 2arcos (\frac{\hat{x}^*}{r}) -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \cos (B)  d \theta  +  \pi- 2 arcos(\frac{\hat{x}^*}{r})\\
+   &= \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \cos (arcsin (\frac{\hat{x}^*}{r \cos (\theta)}))  d \theta  \\
+   &= \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta 
+\end{align*}
+Finally for $\hat{x}^* \leq r_g$ we get that
+\begin{align*}
+&\int_{V^{r_g}}  d^3 x= \int_0^{r_g} r^2 \text{1}_{0 \leq r < \hat{x}^*} \left( \pi - 2 \cdot 0\right)+ r^2 \left( \pi -2 \int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta \right)  \text{1}_{ \hat{x}^*< r \leq r_g}  d r \\
+&= \pi \frac{(\hat{x}^*)^3}{3}+\pi \left( \frac{r_g^3}{3} - \frac{(\hat{x}^*)^3}{3} \right) - 2\int^{r_g}_{\hat{x}^*} r^2 \underbrace{\int_0^{arcos (\frac{\hat{x}^*}{r})} \sqrt{1- \left( \frac{\hat{x}^*}{r \cos (\theta)} \right)^2}  d \theta}_{=: A(\hat{x}^*,r)} dr.
+\end{align*}
+Note that $A(\hat{x}^*,r)$ does not have an analytical solution and needs to be solved numerically. Note that we only calculated $1/4^{th}$ of its volume, i.e. we need to multiply the resulting value by $4$.
 \bibliographystyle{plain}
 \bibliography{References}
 \end{document}
