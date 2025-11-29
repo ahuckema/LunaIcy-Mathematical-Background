@@ -313,7 +313,7 @@ v_g (r_g) := \frac{4}{3}\pi r_g^3-\frac{\pi (r_g -\hat{x}^*)^2}{3} (2r_g +\hat{x
 \end{equation}
 where $\hat{x}^*$ is obtained from the root finding problem in Section 5.4. A more general solution via manifold integrals can be found in the Appendix.
 \subsection{Bond Volume}
-As seen in Figure \ref{Fig: Sintering} there is a circle with radius $r_p$ that satisfies 
+As seen in Figure \ref{Fig: Geometry} there is a circle with radius $r_p$ that satisfies 
 \[
 (r_g +r_p)^2 = r_g^2 + (r_b+r_p)^2 
 \]
@@ -344,15 +344,15 @@ Finally, we have
 
 
 \subsection{Surface Area and Curvature}
-The Surface area is in this model of crucial importance, as it is the exchange area of water vapor mass. For the grain we could use the complicated approach and calculate it from our derivation in the Appendix:
+The surface area in this model, is of crucial importance, as it determines the exchange area of water vapor mass. For the grain we could use the complicated approach from the Appendix and calculate
 \[
-S_g := r_g^2 \cdot \left( \pi -2 \int_0^{\text{arcos} (\frac{\hat{x}^*}{r_g})} \sqrt{1- \left( \frac{\hat{x}^*}{r_g \cos (\theta)} \right)^2}  d \theta  \right),
+S_g (r_g)= r_g^2 \cdot \left( \pi -2 \int_0^{\text{arcos} (\frac{\hat{x}^*}{r_g})} \sqrt{1- \left( \frac{\hat{x}^*}{r_g \cos (\theta)} \right)^2}  d \theta  \right),
 \]
-but this is too complicated. A simple analytic solution is given by
+but this is too complicated. A simple analytic solution from \cite{https://doi.org/10.48550/arxiv.2410.15844} is given by
 \[
-S_g (r_g) = 4\pi r_g^2 - 2 \pi r_g (r_g - \hat{x}^*) = 2 \pi r_g (r_g + \hat{x}^*).
+S_g (r_g) = 4 \pi r_g^2 - 2 \left( 4\pi r_g^2 - 2 \pi r_g (r_g - \hat{x}^*)  \right) = 4 \pi r_g  \hat{x}^*.
 \]
-The surface area of the bond is given by the volume of the following set 
+The surface area of the bond is given by the volume of the following set, where $r(x_1):= r_b +r_p - \sqrt{r_p^2 -x_1^2} $:
 \[
 S^{r_b} := \{ x \in \mathbb{R}^3 \mid 0 \leq x_1 \leq r_g -\hat{x}^*, \sqrt{x_2^2+x_3^2} = r(x_1) \}
 \]
@@ -373,54 +373,79 @@ and thus
 S_b(r_g,r_b) &= \int_0^{2 \pi} \int_0^{r_g -\hat{x}^*} r(x) \sqrt{1+ r^\prime (x)^2} dx d \theta \\
 &= 2 \pi \int_0^{r_g -\hat{x}^*} r(x) \sqrt{1+ \frac{x^2}{r_p^2 -x^2 } } dx = 2 \pi r_p \left( (r_b + r_p) \text{arcsin} (\frac{r_g-\hat{x}^*}{r_p} ) - (r_g - \hat{x}^*) \right).
 \end{align*}
-The curvature of the grain is $K_g = \frac{2}{r_g}$ and of the bond $K_b =- \frac{1}{r_b}$ respectively. The difference of sign is due to the fact that the bond is concave while the grain is convex.
+The curvature of the grain is $K_g = \frac{2}{r_g}$ and of the bond $K_b =\frac{1}{r_b} - \frac{1}{r_p}$ respectively. The difference of sign is due to the fact that the bond is concave while the grain is convex.
 \subsection{Finding the Intersection of Bond and Grain Area}
-In each time step the geometry updates, which means that $\hat{x}^*$ changes in every time step. It describes the point where the surface area of the bond and grain intersect. We can formulate it as the solution of the equation 
+In each time step, the geometry updates, which means that $\hat{x}^*$ changes in every time step, recalling that $\hat{x}^*$ is where the surfaces of the bond and grain intersect. It is the solution of the equation 
 \begin{equation}
     \label{Eq: HatxStar}
 \sqrt{r_g^2 -x^2} = r_b +r_p - \sqrt{r_p^2 - (r_g -x)^2}, \quad x \in (0,r_g).
 \end{equation}
-This equation can be numerically solved as an root finding problem and its solution then gives us $\hat{x}^*$.
+This equation for a $4^\text{th}$ root of polynomials can be numerically solved and its solution in $(0,r_g)$ gives us $\hat{x}^*$, hopefully uniquely.
 
 \chapter{Implementation}
 \section{Simulations}
-In this section the results from two different simulations will be presented. The first is a more simple one, where we assume constant temperature and only consider the sintering process for an individual ice grain and bond. It considers the development of the relative bond grain radius over time for different initial grain radii. In all cases, the original experiment by \ref{doiSinteringAdhesion} and the simulation in \cite{https://doi.org/10.48550/arxiv.2410.15844} get an objectively similar result. Note that no rigorous error from the original to my result was calculated. Nevertheless, the results are similar, as shown in my simulation:
+In this section the results from two different simulations will be presented. In the first we simply assume constant temperature and only consider the sintering process for an individual ice grain and bond. It considers the development of the relative bond grain radius over time for different initial grain radii. In all cases, the original experiment by \cite{hobbs1964sintering} and the simulation in \cite{https://doi.org/10.48550/arxiv.2410.15844} obtain comparable results as seen in Figure \ref{Fig: Original MiniExample}. Also the presented simulation, using implicit Euler, gives similar curves as seen in Figure \ref{Fig: MiniExample}.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.5\textwidth]{Pictures/MiniExampleResults.png}
-  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results with constant temperature $-3$°C, sticking coefficient $\alpha=0.03$ and porosity $\phi=0.4$, although the last constant was not mentioned in this particular example.}
-  \label{Fig: MiniExample}
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        % Replace with your filename
+        \includegraphics[width=\textwidth]{Pictures/LunaIcyOne}
+        \caption{These are the results from \cite{https://doi.org/10.48550/arxiv.2410.15844}. The crosses are data points from \cite{hobbs1964sintering} and the lines from the model of \cite{https://doi.org/10.48550/arxiv.2410.15844}. They chose constant temperature $-3$°C, sticking coefficient $\alpha=0.03$ and porosity $\phi=0.4$. }
+        \label{Fig: Original MiniExample}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Pictures/MiniExampleResults.png}
+        \caption{My simulation was carried out with constant temperature $-3$°C, sticking coefficient $\alpha=0.03$ and porosity $\phi=0.4$, although the last constant was not mentioned in the caption of Figure 3. in \cite{https://doi.org/10.48550/arxiv.2410.15844}.}
+        \label{Fig: MiniExample}
+    \end{subfigure}
+    \caption{}
 \end{figure}
 
-The second simulation considers the entire coupled system, i.e. sintering in every state of the slice of the ice sheet with dynamic temperature described by the PDE. The initial bond radius is set to $r_b = 10^{-5}$ and the grain radius to $r_g = 10^{-4}$. Due to the fact that computational power is limited, the simulation was only run for $10$ days compared to the 1 million years in \cite{https://doi.org/10.48550/arxiv.2410.15844}. Still an objectively similar result is obtained, as the bond radii increase in size over time, especially in increasing distance above the diurnal skin depth. Underneath the diurnal skin depth there is no variation in the bond radii, as this is hard coded in the lower boundary condition of the PDE.
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.5\textwidth]{Pictures/ResultFromDynamicSintering}
-  \caption{Analogous to \cite{https://doi.org/10.48550/arxiv.2410.15844} we get objectively similar results, although here we let it run significantly shorter. The bond radii increase in size over time. This effect is increasingly above the Diurnal skin depth visible.}
-  \label{Fig: Sintering}
-\end{figure}
+The second simulation considers the entire coupled system, i.e. sintering in every state of the slice of the ice sheet with dynamic temperature described by the PDE. The initial bond radius is set to $r_b = 10^{-5}$ and the initial grain radius to $r_g = 10^{-4}$. Due to computational resource limits, the simulation is run for $10$ days only compared to the 1 million years in \cite{https://doi.org/10.48550/arxiv.2410.15844}. Underneath the diurnal skin depth there is no variation in the bond radii, as this is hard coded in the lower boundary condition of the PDE.
 
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Pictures/LunaIcyDynamic}
+        \caption{These are the results from \cite{https://doi.org/10.48550/arxiv.2410.15844}. The Bond radius for every depths is plotted after 1 million years of sintering with albedo $A= 0.4$ and porosity of $\phi= 0.8$. The initial bond radius is $r_b(x, 0) \approx 4 10^{-5} $. }
+        \label{Fig: OriginalSintering}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Pictures/ResultFromDynamicSintering} 
+        \caption{Compared to \cite{https://doi.org/10.48550/arxiv.2410.15844} whose $t_f = 1$ Million years, we get similar results, although here we let it run significantly shorter, $t_f =100$ Days. The bond radii have increased in size over time. Note that the effect of increasing bond radii is stronger the lower the depth of the grain above the Diurnal skin depth.}
+        \label{Fig: Sintering}
+    \end{subfigure}
+    \caption{}
+\end{figure}
 
 \section{Outlook}
-This study demonstrated that in a deterministic setting sintering occurs above the diurnal skin depth of Europa's ice sheet. However, in order to make more realistic predictions on the ice sheet evolution, micro meteor impacts need to be considered. We assume that micro meteorites impacts change the porosity, density of the ice, temperature and mass of gas, grain and bonds. This is why we now consider the larger state vector 
+This report reimplimented that in a deterministic setting sintering occurs above the diurnal skin depth of Europa's ice sheet. However, as suggested in the intern advertisement, in order to make more realistic predictions on the ice sheet evolution, micro meteor impacts need to be considered. We assume that micro meteorites impacts change the porosity, density of the ice, temperature and mass of gas, grain and bonds. This is why we may consider the larger state vector 
 \[
-u(x,t) := (T(x,t), m_g (x,t),m_b (x,t), \phi (x,t),\chi (x,t))^T,
+u(x,t) := (T(x,t), m_g (x,t),m_b (x,t), \phi (x,t),\rho (x,t))^T,
 \]
-where $\phi(x,t)$ is the porosity and $\chi (x,t)$ the density of the ice. Then including micro meteor impacts the full stochastic PDE/ODE system is 
+where $\phi(x,t)$ is the porosity and $\rho (x,t)$ the density of the ice. Then, including micro meteor impacts, the full stochastic PDE/ODE system is 
 \begin{align*}
     & dT(x,t) = \frac{1}{\rho c_p} \frac{\partial}{\partial x} k(x,t) \frac{\partial}{\partial x} T(x,t) dt + dI_{impacts}^1 (x,t) \\
     &d m_{gb} (x,t) = F(f(m_{gb}(x,t)),T(x,t)) dt+ dI_{impacts}^2 (x,t) \\
     &d \phi (x,t) = G(m_{gb}(x,t),\phi (x,t),T(x,t)) dt+ dI_{impacts}^3 (x,t) \\
-    &d \chi (x,t) = H(m_{gb}(x,t),\chi (x,t),T(x,t)) dt + dI_{impacts}^4 (x,t)
+    &d \rho (x,t) = H(m_{gb}(x,t),\rho (x,t),T(x,t)) dt + dI_{impacts}^4 (x,t)
 \end{align*}
 where 
 \[
 dI^{i}_{impacts} (x,t):= \int_{\mathcal{E}} \mathcal{G}_i( \lim_{\epsilon \searrow 0} u(x,t-\epsilon) ,E) \Phi (dt,dE), \quad i=1,2,3,4,
 \]
-where $\Phi$ is a Poisson point process on $\mathbb{R}^+ \times \mathcal{E}$ with intensity measure $\lambda \times \nu$, where $\lambda$ is the Lebesgue measure and $\nu$ a suitable measure on the space of Energy released by the meteor $\mathcal{E}$. The function $\mathcal{G}_i$ describes the change in the state vector due to an impact of a meteor with energy $E \in \mathcal{E}$. Due to the fact that an impact is assumed to be instantaneously, the resulting stochastic process $u(x,t)_{t \geq 0}$ is a jump process, i.e. Càdlàg, which forces us to use left limits in time. As long as there are no impacts, the stochastic Integral is zero and behaves deterministically. Note that the stochastic integral here over a Jump process is extremely tedious and the theory behind it is quite complicated. Maybe trying to find a stochastic process that is path wise a.s. continuous and approximates this Poisson point process, might make the derivation a little easier.\\
-Further, this is a marked Poisson point process, where the marks are the energies at each impact of the meteor.\\
-The density on the Energy space $\mathcal{E}$ is of the form 
+where $\Phi$ is a Poisson point process on $\mathbb{R}^+ \times \mathcal{E}$ with intensity measure $\lambda \times \nu$, where $\lambda$ is the Lebesgue measure and $\nu$ a suitable measure on the space of Energy $\mathcal{E}$ released by the meteor. The functions $\mathcal{G}_i$ describes the change in the state vector due to an impact of a meteor with energy $E \in \mathcal{E}$. Due to the fact that an impact is assumed to be instantaneously, the resulting stochastic process $u(x,t)_{t \geq 0}$ is a jump process, i.e. càdlàg, which forces us to use left limits in time. As long as there are no impacts, the stochastic integral is zero and the system behaves deterministically. The stochastic integral here over a jump process may be tedious and the theory behind, can be quite complicated. One my attempt to approximate the discontinuities by a stochastic process that is path wise a.s. continuous.\\
+Notably, $\Phi$ is a marked Poisson point process, where the marks are energies at each impact of the meteor.\\
+As density on the Energy space $\mathcal{E}$ one may use 
 \[
 \nu (dE) := A_{surf} \Psi (E) dE, \quad \Psi (E) \sim const. E^{-\beta}.
 \]
@@ -433,7 +458,7 @@ satisfies by definition of the Poisson distribution
 \mathbb{P}(M_t \leq e) &= \mathbb{P}( \Phi ([0,T] \times [e, \infty]) =0) = \exp(-\lambda (0,T) \cdot \nu ([e,\infty ])) = \exp (-T A_{surf} \int_e^\infty \Psi (E) dE) \\
 &= \exp \left( -T A_{surf} \frac{const.}{\beta -1} e^{-(\beta -1)} \right),
 \end{align*}
-which is a Frèchet distribution. In order to make assumptions on worst case scenario impacts that might effect missions to Europa, extreme value theory might be taken into consideration.
+which is a Frèchet distribution. In order to assess worst case scenario impacts, extreme value theory might be taken into consideration.
 
 
 \appendix 
