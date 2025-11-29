@@ -206,7 +206,8 @@
 
 \titleformat{\chapter}[display]
 {\centering\normalfont\Huge}
-{\titlerule[5pt]\vspace{3pt}\titlerule[2pt]\vspace{3pt}\textbf{\MakeUppercase{\chaptername} \thechapter}}
+% We removed \MakeUppercase{\chaptername} and just kept \thechapter
+{\textbf{\thechapter}} 
 {0pt}
 {\titlerule[2pt]\vspace{1pc}\Huge\MakeUppercase{#1}}
 
